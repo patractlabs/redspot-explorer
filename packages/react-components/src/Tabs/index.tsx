@@ -59,10 +59,10 @@ function Tabs ({ basePath, className = '', hidden, items }: Props): React.ReactE
           {filtered.map((tab, index) => (
             <li key={index}>
               <Tab
-                {...tab}
                 basePath={basePath}
                 index={index}
                 key={tab.name}
+                {...tab}
               />
             </li>
           ))}
@@ -77,7 +77,7 @@ export default React.memo(styled(Tabs)`
   border-bottom: 1px solid var(--border-tabs);
   text-align: left;
   z-index: 1;
-
+  box-shadow: rgba(255, 66, 142, 0.5) 0 6px 6px -6px;
   & .tabs-container {
     display: flex;
     align-items: center;

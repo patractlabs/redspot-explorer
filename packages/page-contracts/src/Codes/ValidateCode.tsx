@@ -11,44 +11,47 @@ import React, { useMemo } from 'react';
 import { InfoForInput } from '@polkadot/react-components';
 import { useApi, useCall } from '@polkadot/react-hooks';
 import { isHex } from '@polkadot/util';
+import { ContractProjectSource } from '@polkadot/types/interfaces/types';
 
 import { useTranslation } from '../translate';
 
 interface Props {
   codeHash?: string | null;
+  source?: ContractProjectSource | null;
   onChange: React.Dispatch<boolean>;
 }
 
-function ValidateCode ({ codeHash, onChange }: Props): React.ReactElement<Props> | null {
-  const { api } = useApi();
+function ValidateCode ({ codeHash, source, onChange }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
-  const codeStorage = useCall<Option<PrefabWasmModule>>((api.query.contracts || api.query.contract).codeStorage, [codeHash]);
-  const [isValidHex, isValid] = useMemo(
-    (): [boolean, boolean] => {
+
+  const [isValidHex, isWasmValid, isValid] = useMemo(
+    (): [boolean, boolean, boolean] => {
       const isValidHex = !!codeHash && isHex(codeHash) && codeHash.length === 66;
-      const isStored = !!codeStorage && codeStorage.isSome;
-      const isValid = isValidHex && isStored;
+      const isWasmValid = !!source?.wasm && !source.wasm.isEmpty;
+      const isValid = isValidHex && isWasmValid;
 
-      onChange(isValid);
-
+      onChange(isValid)
+      
       return [
         isValidHex,
+        isWasmValid,
         isValid
       ];
     },
-    [codeHash, codeStorage, onChange]
+    [codeHash, source]
   );
 
-  if (isValid || !isValidHex) {
+  if (isValid || !source) {
     return null;
   }
+
 
   return (
     <InfoForInput type='error'>
       {
-        isValidHex
-          ? t('Unable to find on-chain WASM code for the supplied codeHash')
-          : t('The codeHash is not a valid hex hash')
+        !isValidHex
+          ? t('The codeHash is not a valid hex hash')
+          : !isWasmValid ? t('The abi file needs to contain the wasm code.') : 'Unknow error'
       }
     </InfoForInput>
   );

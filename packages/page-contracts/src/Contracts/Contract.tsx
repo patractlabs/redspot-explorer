@@ -6,8 +6,9 @@ import type { ActionStatus } from '@polkadot/react-components/Status/types';
 import type { Option } from '@polkadot/types';
 import type { BlockNumber, ContractInfo } from '@polkadot/types/interfaces';
 import type { ContractLink } from './types';
-
-import React, { useCallback, useEffect, useState } from 'react';
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { ContractPromise } from '@polkadot/api-contract';
@@ -16,6 +17,7 @@ import { useApi, useBestNumber, useCall, useToggle } from '@polkadot/react-hooks
 import { BlockToTime } from '@polkadot/react-query';
 import { keyring } from '@polkadot/ui-keyring';
 import { formatNumber, isFunction, isUndefined } from '@polkadot/util';
+import { getAddressMeta } from '@polkadot/react-components/util';
 
 import Messages from '../shared/Messages';
 import { useTranslation } from '../translate';
@@ -31,6 +33,8 @@ interface Props {
 function transformInfo (optInfo: Option<ContractInfo>): ContractInfo | null {
   return optInfo.unwrapOr(null);
 }
+
+dayjs.extend(relativeTime)
 
 function Contract ({ className, contract, index, links, onCall }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
@@ -74,6 +78,15 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
     },
     [contract.address, t, toggleIsForgetOpen]
   );
+
+  const createdTime = useMemo(() => {
+    const meta = getAddressMeta(contract.address.toString(), 'contract')
+
+    if(meta.whenCreated) {
+      return dayjs(meta.whenCreated).fromNow()
+    }
+    return null
+  }, [contract.address])
 
   return (
     <tr className={className}>
@@ -132,6 +145,9 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
             )
             : t<string>('None')
         )}
+      </td>
+      <td>
+        {createdTime}
       </td>
       <td className='button'>
         <Button

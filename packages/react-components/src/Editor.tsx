@@ -69,10 +69,10 @@ function Editor ({ className = '', code, isValid, onEdit }: Props): React.ReactE
 }
 
 export default React.memo(styled(Editor)`
-  .codeflask {
+  /* .codeflask {
     border: 1px solid rgba(34,36,38,.15);
     background: transparent;
-  }
+  } */
 
   &.invalid {
     .codeflask {

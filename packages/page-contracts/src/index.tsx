@@ -3,13 +3,15 @@
 
 import type { AppProps as Props } from '@polkadot/react-components/types';
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useTranslation } from '@polkadot/app-contracts/translate';
 import { HelpOverlay, Tabs } from '@polkadot/react-components';
+import { Display } from '@polkadot/react-components';
 
 import introMd from './md/intro.md';
 import Contracts from './Contracts';
+import Codes from './Codes';
 
 function ContractsApp ({ basePath, className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -17,9 +19,13 @@ function ContractsApp ({ basePath, className = '' }: Props): React.ReactElement<
   const itemsRef = useRef([
     {
       isRoot: true,
-      name: 'contracts',
+      name: 'codes',
+      text: t('Codes')
+    },
+    {
+      name: 'playground',
       text: t('Contracts')
-    }
+    },
   ]);
 
   return (
@@ -29,7 +35,12 @@ function ContractsApp ({ basePath, className = '' }: Props): React.ReactElement<
         basePath={basePath}
         items={itemsRef.current}
       />
-      <Contracts />
+      <Display path="/contracts/playground">
+        <Contracts />
+      </Display>
+      <Display path="/contracts">
+        <Codes />
+      </Display>
     </main>
   );
 }

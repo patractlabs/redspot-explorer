@@ -123,8 +123,12 @@ export default (_theme: ThemeDef): string => `
     z-index: 1;
   }
 
+  .ui.selection.dropdown.error {
+    background: #372463;
+  }
+
   .ui.modal {
-    background: var(--bg-page);
+    background: var(--bg-modal);
     box-shadow: none;
     color: var(--color-text);
     font: var(--font-sans);
@@ -210,5 +214,63 @@ export default (_theme: ThemeDef): string => `
   /* remove the default white background, settings app has it as part of Tab */
   .ui.segment {
     background: transparent;
+  }
+
+  body .ui.input>input {
+    border-color: #3f4455;
+  }
+
+  body .ui.input>input:hover {
+    border-color: #3f4455;
+  }
+
+  body .ui.selection.dropdown {
+    border-color: #3f4455;
+  }
+
+  body .ui.input.focus>input, .ui.input>input:focus {
+    border-color: #3f4455;
+  }
+
+  body .ui.selection.dropdown:focus {
+    border-color: #3f4455;
+  }
+
+  body .ui.selection.active.dropdown {
+    border-color: #3f4455;
+  }
+  
+  body .ui.selection.active.dropdown:hover {
+    border-color: #3f4455;
+  }
+
+  body .ui.selection.active.dropdown:focus {
+    border-color: #3f4455;
+  }
+  body .ui.selection.active.dropdown .menu {
+    border-color: #3f4455;
+  }
+
+  body .ui.selection.dropdown:hover {
+    border-color: #3f4455;
+  }
+  
+  body .ui.selection.active.dropdown:hover .menu {
+    border-color: #3f4455;
+  }
+  body .ui.selection.active.dropdown:focus .menu {
+    border-color: #3f4455;
+  }
+  
+  body .ui.action.input:not([class*="left action"])>input:focus {
+    border-right-color: transparent !important;
+  }
+  
+  body .ui--DropdownLinked.ui--row .ui.selection.active.dropdown {
+    border-color: #3f4455;
+  }
+  
+  body .ui--DropdownLinked.ui--row .ui.selection.dropdown:focus {
+    border-color: #3f4455;
   }
 `;

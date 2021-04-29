@@ -22,7 +22,7 @@ interface Props {
 }
 
 function createTheme ({ uiTheme }: { uiTheme: string }): ThemeDef {
-  const validTheme = uiTheme === 'dark' ? 'dark' : 'light';
+  const validTheme = 'dark';
 
   document && document.documentElement &&
     document.documentElement.setAttribute('data-theme', validTheme);
@@ -36,7 +36,9 @@ function Root ({ store }: Props): React.ReactElement<Props> {
   const [theme, setTheme] = useState(() => createTheme(settings));
 
   useEffect((): void => {
+    console.log('change', settings.apiUrl)
     settings.on('change', (settings) => setTheme(createTheme(settings)));
+
   }, []);
 
   return (

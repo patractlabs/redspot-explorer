@@ -35,6 +35,7 @@ export { useOwnStashInfos } from './useOwnStashInfos';
 export { useParaApi } from './useParaApi';
 export { useIsParasLinked, useParaEndpoints } from './useParaEndpoints';
 export { usePassword } from './usePassword';
+export { useRedspotConfig } from './useRedspotConfig';
 export { useRegistrars } from './useRegistrars';
 export { useSavedFlags } from './useSavedFlags';
 export { useStepper } from './useStepper';

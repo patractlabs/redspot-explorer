@@ -33,7 +33,7 @@ function Sidebar ({ button, children, className = '', onClose }: Props): React.R
 }
 
 export default React.memo(styled(Sidebar)(({ offset = 0, position }: Props) => `
-  background: var(--bg-page);
+  background: var(--bg-table);
   bottom: 0;
   box-shadow: ${position === 'right' ? '-6px' : '6px'} 0px 20px 0px rgba(0, 0, 0, 0.3);
   margin-left: -0.125rem;
@@ -44,6 +44,8 @@ export default React.memo(styled(Sidebar)(({ offset = 0, position }: Props) => `
   overflow-y: auto;
   top: 0;
   z-index: 999;
+  border-left: 1px solid var(--border-table);
+  
   ${position}: ${offset};
 
   .ui--Sidebar-buttons {

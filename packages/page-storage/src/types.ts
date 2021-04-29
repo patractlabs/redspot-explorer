@@ -10,7 +10,7 @@ interface Base {
 }
 
 interface IdQuery extends Base {
-  id: number;
+  id: string;
 }
 
 export interface PartialModuleQuery extends Base {
@@ -37,5 +37,5 @@ export type QueryTypes = StorageModuleQuery | StorageRawQuery | ConstQuery;
 export type ParitalQueryTypes = PartialModuleQuery | PartialRawQuery | PartialConstQuery;
 
 export interface ComponentProps {
-  onAdd: (query: ParitalQueryTypes) => void;
+  // onAdd: (query: ParitalQueryTypes) => void;
 }

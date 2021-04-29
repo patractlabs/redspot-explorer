@@ -12,7 +12,8 @@ export default function create (t: TFunction): Route {
     display: {
       needsApi: [
         'tx.assets.setMetadata'
-      ]
+      ],
+      isHidden: true,
     },
     group: 'network',
     icon: 'shopping-basket',

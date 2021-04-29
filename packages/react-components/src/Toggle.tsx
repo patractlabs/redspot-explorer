@@ -61,7 +61,7 @@ export default React.memo(styled(Toggle)`
     width: 3rem;
 
     &::before {
-      background: var(--bg-table);
+      background: #bdbdbd;
       border: 0.125rem solid var(--bg-toggle);
       border-radius: 50%;
       content: "";

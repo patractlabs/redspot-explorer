@@ -10,6 +10,7 @@ import type { ApiProps, ApiState } from './types';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import store from 'store';
 
+import { accountRegex } from '@polkadot/ui-keyring/defaults';
 import { ApiPromise } from '@polkadot/api/promise';
 import { deriveMapCache, setDeriveCache } from '@polkadot/api-derive/util';
 import { ethereumChains, typesBundle, typesChain } from '@polkadot/apps-config';
@@ -23,7 +24,6 @@ import { settings } from '@polkadot/ui-settings';
 import { formatBalance, isTestChain } from '@polkadot/util';
 import { setSS58Format } from '@polkadot/util-crypto';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
-
 import ApiContext from './ApiContext';
 import registry from './typeRegistry';
 import { decodeUrlTypes } from './urlTypes';
@@ -194,12 +194,18 @@ function Api ({ children, store, url }: Props): React.ReactElement<Props> | null
 
   // initial initialization
   useEffect((): void => {
+    if(!url) return;
     const provider = new WsProvider(url);
     const signer = new ApiSigner(registry, queuePayload, queueSetTxStatus);
     const types = getDevTypes();
 
     api = new ApiPromise({ provider, registry, signer, types, typesBundle, typesChain });
 
+    // @ts-ignore
+    api.signPayload = (payload: any) => {
+      return signer.signPayload(payload)
+    }
+    
     api.on('connected', () => setIsApiConnected(true));
     api.on('disconnected', () => setIsApiConnected(false));
     api.on('error', (error: Error) => setApiError(error.message));
@@ -221,7 +227,7 @@ function Api ({ children, store, url }: Props): React.ReactElement<Props> | null
 
     setIsApiInitialized(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [url]);
 
   if (!value.isApiInitialized) {
     return null;

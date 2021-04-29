@@ -28,7 +28,7 @@ function ExplorerApp ({ basePath, className }: Props): React.ReactElement<Props>
   const { t } = useTranslation();
   const { api } = useApi();
   const { lastHeaders } = useContext(BlockAuthorsContext);
-  const events = useContext(EventsContext);
+  const {events} = useContext(EventsContext);
 
   const itemsRef = useRef([
     {

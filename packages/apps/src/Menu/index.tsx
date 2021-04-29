@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import createRoutes from '@polkadot/apps-routing';
-import { useAccounts, useApi, useCall } from '@polkadot/react-hooks';
+import { useAccounts, useApi, useCall, useRedspotConfig } from '@polkadot/react-hooks';
 
 import { findMissingApis } from '../endpoint';
 import { useTranslation } from '../translate';
@@ -26,13 +26,6 @@ interface Props {
 }
 
 const disabledLog = new Map<string, string>();
-
-function createExternals (t: TFunction): ItemRoute[] {
-  return [
-    { href: 'https://github.com/polkadot-js/apps', icon: 'code-branch', name: 'github', text: t<string>('nav.github', 'GitHub', { ns: 'apps-routing' }) },
-    { href: 'https://wiki.polkadot.network', icon: 'book', name: 'wiki', text: t<string>('nav.wiki', 'Wiki', { ns: 'apps-routing' }) }
-  ];
-}
 
 function logDisabled (route: string, message: string): void {
   if (!disabledLog.get(route)) {
@@ -93,11 +86,12 @@ function Menu ({ className = '' }: Props): React.ReactElement<Props> {
   const sudoKey = useCall<AccountId>(apiProps.isApiReady && apiProps.api.query.sudo?.key);
   const location = useLocation();
 
-  const externalRef = useRef(createExternals(t));
-
   const groupRef = useRef({
     accounts: t('Accounts'),
     developer: t('Developer'),
+    tools: t('Tools'),
+    contracts: t('Contracts'),
+    chain: t('Chain'),
     governance: t('Governance'),
     network: t('Network'),
     settings: t('Settings')
@@ -120,13 +114,14 @@ function Menu ({ className = '' }: Props): React.ReactElement<Props> {
     [location]
   );
 
-  const isLoading = !apiProps.isApiReady || !apiProps.isApiConnected;
-
+  const isLoadingRedspot = useRedspotConfig();
+  const isLoading = !apiProps.isApiReady || !apiProps.isApiConnected ;
+  
   return (
-    <div className={`${className}${isLoading ? ' isLoading' : ''} highlight--bg`}>
+    <div className={`${className}${isLoading ? ' isLoading' : ''} sidebar-bg`}>
       <div className='menuContainer'>
         <div className='menuSection'>
-          <ChainInfo />
+          {isLoadingRedspot && <ChainInfo />}
           <ul className='menuItems'>
             {visibleGroups.map(({ name, routes }): React.ReactNode => (
               <Grouping
@@ -138,64 +133,61 @@ function Menu ({ className = '' }: Props): React.ReactElement<Props> {
             ))}
           </ul>
         </div>
-        <div className='menuSection media--1200'>
-          <ul className='menuItems'>
-            {externalRef.current.map((route): React.ReactNode => (
-              <Item
-                isLink
-                isToplevel
-                key={route.name}
-                route={route}
-              />
-            ))}
-          </ul>
-        </div>
-        <NodeInfo className='media--1400' />
+        <NodeInfo />
       </div>
     </div>
   );
 }
 
 export default React.memo(styled(Menu)`
-  width: 100%;
+  width: 250px;
   padding: 0;
   z-index: 220;
   position: relative;
 
+  &.sidebar-bg {
+    background: #100f1a;
+    border-right: 1px solid #8c2c56;
+  }
+
   & .menuContainer {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    /* align-items: center; */
     display: flex;
     justify-content: space-between;
-    padding: 0 1.5rem;
-    width: 100%;
-    max-width: var(--width-full);
+    padding: 0 1rem;
+    height: 100%;
+    /* width: 100%; */
+    /* max-width: var(--width-full); */
     margin: 0 auto;
   }
 
+
+
   &.isLoading {
-    background: #999 !important;
+    background: #100f1a;
 
     .menuActive {
-      background: var(--bg-page);
+      background: #991a51;
     }
 
-    &:before {
+    /* &:before {
       filter: grayscale(1);
     }
 
     .menuItems {
       filter: grayscale(1);
-    }
+    } */
   }
 
   .menuSection {
-    align-items: center;
+    /* align-items: center; */
     display: flex;
+    flex-direction: column;
   }
 
   .menuActive {
-    background: var(--bg-tabs);
+    background: #991a51;
     border-bottom: none;
     border-radius: 0.25rem 0.25rem 0 0;
     color: var(--color-text);
@@ -209,22 +201,24 @@ export default React.memo(styled(Menu)`
   }
 
   .menuItems {
+    display: flex;
+    flex-direction: column;
     flex: 1 1;
     list-style: none;
-    margin: 0 1rem 0 0;
+    margin: 2rem 1rem;
     padding: 0;
 
     > li {
       display: inline-block;
     }
 
-    > li + li {
+    /* > li + li {
       margin-left: 0.375rem
-    }
+    } */
   }
 
   .ui--NodeInfo {
-    align-self: center;
+    /* align-self: center; */
   }
 
 `);

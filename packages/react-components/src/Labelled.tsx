@@ -111,6 +111,10 @@ export default React.memo(styled(Labelled)`
         flex: 1 1;
         min-width: 0;
 
+        .ui.dropdown .menu>.header {
+          color: var(--color-text);
+        }
+
         .ui.selection.dropdown {
           &:not(.floating) {
             padding-left: 1.45rem;

@@ -90,7 +90,7 @@ function Upload ({ onClose }: Props): React.ReactElement {
 
     try {
       contract = code && contractAbi && endowment
-        ? code.createContract(constructorIndex, { gasLimit: weight.weight, value: endowment }, params)
+        ? code.tx[constructorIndex]({ gasLimit: weight.weight, value: endowment }, params)
         : null;
     } catch (e) {
       error = (e as Error).message;

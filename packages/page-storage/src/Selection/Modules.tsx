@@ -5,9 +5,9 @@ import type { QueryableStorageEntry } from '@polkadot/api/types';
 import type { RawParams } from '@polkadot/react-params/types';
 import type { StorageEntryTypeLatest } from '@polkadot/types/interfaces';
 import type { TypeDef } from '@polkadot/types/types';
-import type { ComponentProps as Props } from '../types';
+import type { ComponentProps as Props, QueryTypes } from '../types';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { ApiPromise } from '@polkadot/api';
 import { Button, InputStorage } from '@polkadot/react-components';
@@ -16,6 +16,7 @@ import Params from '@polkadot/react-params';
 import { getTypeDef } from '@polkadot/types';
 import { TypeDefInfo } from '@polkadot/types/types';
 import { isNull, isUndefined } from '@polkadot/util';
+import Queries from '../Queries';
 
 import { useTranslation } from '../translate';
 
@@ -99,18 +100,33 @@ function expandKey (api: ApiPromise, key: QueryableStorageEntry<'promise'>): Key
   };
 }
 
-function Modules ({ onAdd }: Props): React.ReactElement<Props> {
+let id = -1;
+
+function Modules ({ }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { api } = useApi();
-  const [{ defaultValues, isIterable, key, params }, setKey] = useState<KeyState>({ defaultValues: undefined, isIterable: false, key: api.query.timestamp.now, params: [] });
+  const [{ defaultValues, isIterable, key, params }, setKey] = useState<KeyState>({ defaultValues: undefined, isIterable: false, key: api.query.contracts.accountCounter, params: [] });
   const [{ isValid, values }, setValues] = useState<ValState>({ isValid: true, values: [] });
+
+  const [queue, setQueue] = useState<QueryTypes[]>([]);
+
+  const onAdd = useCallback(
+    (query: QueryTypes) => setQueue((queue: QueryTypes[]) => [query, ...queue]),
+    []
+  );
+
+  const _onRemove = useCallback(
+    (id: string) => setQueue((queue: QueryTypes[]) => queue.filter((item) => item.id !== id)),
+    []
+  );
 
   const _onAdd = useCallback(
     (): void => {
       isValid && onAdd({
         isConst: false,
         key,
-        params: values.filter(({ value }, index) => !isIterable || (index !== values.length - 1) || !isNull(value))
+        params: values.filter(({ value }, index) => !isIterable || (index !== values.length - 1) || !isNull(value)),
+        id: `Modules${++id}`
       });
     },
     [isIterable, isValid, key, onAdd, values]
@@ -135,30 +151,36 @@ function Modules ({ onAdd }: Props): React.ReactElement<Props> {
   const { creator: { meta, method, section } } = key;
 
   return (
-    <section className='storage--actionrow'>
-      <div className='storage--actionrow-value'>
-        <InputStorage
-          defaultValue={api.query.timestamp.now}
-          help={meta?.documentation.join(' ')}
-          label={t<string>('selected state query')}
-          onChange={_onChangeKey}
-        />
-        <Params
-          key={`${section}.${method}:params` /* force re-render on change */}
-          onChange={_onChangeValues}
-          onEnter={_onAdd}
-          params={params}
-          values={defaultValues}
-        />
-      </div>
-      <div className='storage--actionrow-buttons'>
-        <Button
-          icon='plus'
-          isDisabled={!isValid}
-          onClick={_onAdd}
-        />
-      </div>
-    </section>
+    <>
+      <section className='storage--actionrow'>
+        <div className='storage--actionrow-value'>
+          <InputStorage
+            defaultValue={api.query.contracts.accountCounter}
+            help={meta?.documentation.join(' ')}
+            label={t<string>('selected state query')}
+            onChange={_onChangeKey}
+          />
+          <Params
+            key={`${section}.${method}:params` /* force re-render on change */}
+            onChange={_onChangeValues}
+            onEnter={_onAdd}
+            params={params}
+            values={defaultValues}
+          />
+        </div>
+        <div className='storage--actionrow-buttons'>
+          <Button
+            icon='plus'
+            isDisabled={!isValid}
+            onClick={_onAdd}
+          />
+        </div>
+      </section>
+      <Queries
+        onRemove={_onRemove}
+        value={queue}
+      />
+    </>
   );
 }
 

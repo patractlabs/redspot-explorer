@@ -186,7 +186,6 @@ function Query ({ className = '', onRemove, value }: Props): React.ReactElement<
 
 export default React.memo(styled(Query)`
   margin-bottom: 0.25em;
-
   label {
     text-transform: none !important;
   }

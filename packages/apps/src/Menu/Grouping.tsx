@@ -33,7 +33,7 @@ function Grouping ({ className = '', isActive, name, routes }: Props): React.Rea
     <li className={`${className} ${isActive ? 'isActive' : ''}`}>
       <div className={`groupHdr ${!isActive ? 'highlight--color-contrast' : ''}`}>
         <span>{name}</span>
-        <Icon icon='caret-down' />
+        {/* <Icon icon='caret-down' /> */}
       </div>
       <ul className='groupMenu'>
         {routes.map((route): React.ReactNode => (
@@ -53,7 +53,7 @@ export default React.memo(styled(Grouping)`
 
   .groupHdr {
     border-radius: 0.25rem;
-    padding: 0.857rem 1.375rem;
+    padding: 1rem;
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.214rem;
@@ -64,21 +64,21 @@ export default React.memo(styled(Grouping)`
   }
 
   &.isActive .groupHdr {
-    background-color: var(--bg-tabs);
+    background-color: #991a51;
     font-size: 1rem;
     font-weight: 400;
     margin-bottom: 0;
   }
 
   .groupMenu {
-    border-radius: 0.25rem;
-    box-shadow: 0 ${SHA_OFF} ${SHA_OFF} -${SHA_OFF} ${SHA_COL}, ${SHA_OFF} 0 ${SHA_OFF} -${SHA_OFF} ${SHA_COL}, -${SHA_OFF} 0 ${SHA_OFF} -${SHA_OFF} ${SHA_COL};
-    display: none;
-    margin: 0;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    top: 2.9rem;
+    /* border-radius: 0.25rem; */
+    /* box-shadow: 0 ${SHA_OFF} ${SHA_OFF} -${SHA_OFF} ${SHA_COL}, ${SHA_OFF} 0 ${SHA_OFF} -${SHA_OFF} ${SHA_COL}, -${SHA_OFF} 0 ${SHA_OFF} -${SHA_OFF} ${SHA_COL}; */
+    /* display: none; */
+    /* margin: 0; */
+    /* overflow: hidden; */
+    /* padding: 0; */
+    /* position: absolute; */
+    /* top: 2.9rem; */
     z-index: 250;
 
     > li {
@@ -88,19 +88,9 @@ export default React.memo(styled(Grouping)`
         padding-right: 4rem;
       }
     }
-
-    &::before {
-      bottom: 0;
-      content: ' ';
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      z-index: -1;
-    }
   }
 
-  &:hover {
+  /* &:hover {
     .groupHdr {
       box-shadow: 0px 4px 37px rgba(0, 0, 0, 0.08);
       padding-bottom: 2rem;
@@ -114,5 +104,5 @@ export default React.memo(styled(Grouping)`
         background: var(--bg-menu-hover);
       }
     }
-  }
+  } */
 `);

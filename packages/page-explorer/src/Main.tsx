@@ -19,6 +19,9 @@ interface Props {
 }
 
 function Main ({ events, headers }: Props): React.ReactElement<Props> {
+
+  const label = 'recent events'
+
   return (
     <>
       <Query />
@@ -28,7 +31,7 @@ function Main ({ events, headers }: Props): React.ReactElement<Props> {
           <BlockHeaders headers={headers} />
         </Columar.Column>
         <Columar.Column>
-          <Events events={events} />
+          <Events events={events} label={label} />
         </Columar.Column>
       </Columar>
     </>

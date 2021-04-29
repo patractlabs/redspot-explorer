@@ -11,6 +11,7 @@ import { getSystemChainColor } from '@polkadot/apps-config';
 import GlobalStyle from '@polkadot/react-components/styles';
 import { useApi } from '@polkadot/react-hooks';
 import Signer from '@polkadot/react-signer';
+import { Updater } from '@polkadot/app-contracts/Updater';
 
 import ConnectingOverlay from './overlays/Connecting';
 import Content from './Content';
@@ -28,6 +29,8 @@ function Apps ({ className = '' }: Props): React.ReactElement<Props> {
     [systemChain, systemName]
   );
 
+  
+  
   return (
     <>
       <GlobalStyle uiHighlight={uiHighlight} />
@@ -40,6 +43,7 @@ function Apps ({ className = '' }: Props): React.ReactElement<Props> {
           <ConnectingOverlay />
           <div id={PORTAL_ID} />
         </AccountSidebar>
+        <Updater />
       </div>
       <WarmUp />
     </>
@@ -50,6 +54,6 @@ export default React.memo(styled(Apps)`
   background: var(--bg-page);
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 100vh;
 `);

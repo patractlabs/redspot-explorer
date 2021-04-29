@@ -16,10 +16,7 @@ const definitions: OverrideBundleDefinition = {
         Address: 'MultiAddress',
         FullIdentification: 'AccountId',
         AuthorityState: {
-          _enum: [
-            'Working',
-            'Waiting'
-          ]
+          _enum: ['Working', 'Waiting']
         },
         EraIndex: 'u32',
         ActiveEraInfo: {
@@ -29,10 +26,22 @@ const definitions: OverrideBundleDefinition = {
         UnappliedSlash: {
           validator: 'AccountId',
           reporters: 'Vec<AccountId>'
+        },
+        AccountInfo: 'AccountInfoWithProviders',
+        AliveContractInfo: {
+          trieId: 'TrieId',
+          storageSize: 'u32',
+          pairCount: 'u32',
+          codeHash: 'CodeHash',
+          rentAllowance: 'Balance',
+          deductBlock: 'BlockNumber',
+          lastWrite: 'Option<BlockNumber>',
+          _reserved: 'Option<Null>'
         }
       }
     }
   ]
 };
+
 
 export default definitions;

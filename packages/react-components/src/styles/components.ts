@@ -53,6 +53,16 @@ export default (_theme: ThemeDef): string => `
   }
 
   .ui--DropdownLinked.ui--row {
+    .ui.selection.active.dropdown {
+      border-color: #3f4455;
+    }
+    .ui.selection.dropdown:focus {
+      border-color: #3f4455;
+    }
+    .ui.selection.active.dropdown .menu {
+      border-color: #3f4455;
+    }
+
     .small .ui.selection.dropdown {
       border-right: none;
       border-bottom-right-radius: 0;

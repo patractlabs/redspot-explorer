@@ -109,14 +109,14 @@ function General ({ className = '' }: Props): React.ReactElement<Props> {
           options={iconOptions}
         />
       </div>
-      <div className='ui--row'>
+      {/* <div className='ui--row'>
         <Dropdown
           defaultValue={uiTheme}
           label={t<string>('default interface theme')}
           onChange={_handleChange('uiTheme')}
           options={themeOptions}
         />
-      </div>
+      </div> */}
       <div className='ui--row'>
         <Dropdown
           defaultValue={i18nLang}

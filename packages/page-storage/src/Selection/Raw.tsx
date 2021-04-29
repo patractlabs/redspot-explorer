@@ -1,7 +1,7 @@
 // Copyright 2017-2021 @polkadot/app-storage authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ComponentProps as Props } from '../types';
+import type { ComponentProps as Props, QueryTypes } from '../types';
 
 import React, { useCallback, useState } from 'react';
 
@@ -9,14 +9,30 @@ import { Button, Input } from '@polkadot/react-components';
 import { compactAddLength, u8aToU8a } from '@polkadot/util';
 
 import { useTranslation } from '../translate';
+import Queries from '../Queries';
 
-function Raw ({ onAdd }: Props): React.ReactElement<Props> {
+let id = -1;
+
+function Raw ({}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [{ isValid, key }, setValue] = useState<{ isValid: boolean; key: Uint8Array }>({ isValid: false, key: new Uint8Array([]) });
 
+  const [queue, setQueue] = useState<QueryTypes[]>([]);
+
+  const onAdd = useCallback(
+    (query: QueryTypes) => setQueue((queue: QueryTypes[]) => [query, ...queue]),
+    []
+  );
+
+  const _onRemove = useCallback(
+    (id: string) => setQueue((queue: QueryTypes[]) => queue.filter((item) => item.id !== id)),
+    []
+  );
+
+
   const _onAdd = useCallback(
     (): void => {
-      isValid && onAdd({ isConst: false, key });
+      isValid && onAdd({ isConst: false, key, id: `Raw${++id}` });
     },
     [isValid, key, onAdd]
   );
@@ -34,6 +50,7 @@ function Raw ({ onAdd }: Props): React.ReactElement<Props> {
   );
 
   return (
+    <>
     <section className='storage--actionrow'>
       <div className='storage--actionrow-value'>
         <Input
@@ -51,6 +68,11 @@ function Raw ({ onAdd }: Props): React.ReactElement<Props> {
         />
       </div>
     </section>
+      <Queries
+      onRemove={_onRemove}
+      value={queue}
+    />
+  </>
   );
 }
 

@@ -12,9 +12,9 @@ export default function create (t: TFunction): Route {
     display: {
       needsApi: []
     },
-    group: 'developer',
-    icon: 'database',
-    name: 'chainstate',
-    text: t('nav.storage', 'Chain state', { ns: 'apps-routing' })
+    group: 'chain',
+    icon: 'envelope-open-text',
+    name: 'chain',
+    text: t('nav.storage', 'Chain', { ns: 'apps-routing' })
   };
 }

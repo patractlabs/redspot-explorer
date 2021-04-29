@@ -19,7 +19,7 @@ function Head ({ className = '', filter, header, isEmpty }: Props): React.ReactE
   if (!header?.length) {
     return null;
   }
-
+  
   return (
     <thead className={className}>
       {filter && (

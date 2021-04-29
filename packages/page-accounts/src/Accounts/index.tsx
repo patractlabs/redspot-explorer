@@ -23,7 +23,6 @@ import Qr from '../modals/Qr';
 import { useTranslation } from '../translate';
 import { sortAccounts } from '../util';
 import Account from './Account';
-import BannerClaims from './BannerClaims';
 import BannerExtension from './BannerExtension';
 
 interface Balances {
@@ -227,7 +226,6 @@ function Overview ({ className = '', onStatusChange }: Props): React.ReactElemen
         />
       </Button.Group>
       <BannerExtension />
-      <BannerClaims />
       <Table
         empty={!isLoading && sortedAccountsWithDelegation && t<string>("You don't have any accounts. Some features are currently hidden and will only become available once you have accounts.")}
         filter={filter}

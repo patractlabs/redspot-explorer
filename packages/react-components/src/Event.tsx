@@ -5,16 +5,24 @@ import type { DecodedEvent } from '@polkadot/api-contract/types';
 import type { Bytes } from '@polkadot/types';
 import type { Event } from '@polkadot/types/interfaces';
 import type { Codec } from '@polkadot/types/types';
-
-import React, { useMemo } from 'react';
+import { useApi } from '@polkadot/react-hooks';
+import { NavLink } from 'react-router-dom';
+import { Abi } from '@polkadot/api-contract';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Input } from '@polkadot/react-components';
 import Params from '@polkadot/react-params';
 import { getTypeDef } from '@polkadot/types';
 
 import { useTranslation } from './translate';
-import { getContractAbi } from './util';
+import { getContractAbiByHash, getContractAbi } from './util';
+import styled from 'styled-components';
 
+const LinkCodes = styled.div`
+  text-align: right;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+`
 export interface Props {
   children?: React.ReactNode;
   className?: string;
@@ -34,35 +42,58 @@ function EventDisplay ({ children, className = '', value }: Props): React.ReactE
   const { t } = useTranslation();
   const params = value.typeDef.map(({ type }) => ({ type: getTypeDef(type) }));
   const values = value.data.map((value) => ({ isValid: true, value }));
+  const [abiEvent, setAbiEvent]  = useState<AbiEvent | null>(null)
+  const { api } = useApi();
+  
+  const isAbiEvent = useMemo(() => {
+    return value.section === 'contracts' && value.method === 'ContractEmitted'  && value.data.length === 2
+  }, [value])
 
-  const abiEvent = useMemo(
-    (): AbiEvent | null => {
+  const getAbiEvent = useCallback(
+    async () => {
       // for contracts, we decode the actual event
-      if (value.section === 'contracts' && value.method === 'ContractExecution' && value.data.length === 2) {
+      if (value.section === 'contracts' && value.method === 'ContractEmitted' && value.data.length === 2) {
         // see if we have info for this contract
         const [accountId, encoded] = value.data;
 
+        let abi: Abi | null;
         try {
-          const abi = getContractAbi(accountId.toString());
+          abi = getContractAbi(accountId.toString()) 
+
+          if(!abi) {
+            const data = await api.query.contracts.contractInfoOf(accountId.toString());
+            if(!data.isNone && data.unwrap().isAlive) {
+              abi = getContractAbiByHash(data.unwrap().asAlive.codeHash.toHex());
+            }
+          }
+
 
           if (abi) {
             const decoded = abi.decodeEvent(encoded as Bytes);
-
-            return {
+            
+            
+            setAbiEvent({
               ...decoded,
               values: decoded.args.map((value) => ({ isValid: true, value }))
-            };
+            })
+
+            return 
           }
+          
         } catch (error) {
           // ABI mismatch?
           console.error(error);
         }
       }
 
-      return null;
+      setAbiEvent(null);
     },
-    [value]
+    [value, api]
   );
+  
+  useEffect(() => {
+    getAbiEvent()
+  }, [getAbiEvent]);
 
   return (
     <div className={`ui--Event ${className}`}>
@@ -72,7 +103,7 @@ function EventDisplay ({ children, className = '', value }: Props): React.ReactE
         params={params}
         values={values}
       >
-        {abiEvent && (
+        {isAbiEvent ? abiEvent ? (
           <>
             <Input
               isDisabled
@@ -85,7 +116,9 @@ function EventDisplay ({ children, className = '', value }: Props): React.ReactE
               values={abiEvent.values}
             />
           </>
-        )}
+        ): <LinkCodes>
+          <NavLink to="/contracts/codes">upload contract bundle</NavLink>
+        </LinkCodes> : null}
       </Params>
     </div>
   );

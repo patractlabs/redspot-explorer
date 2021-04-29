@@ -11,6 +11,7 @@ import store from './store';
 
 interface AbiState {
   abi: string | null;
+  wasm: string | null,
   abiName: string | null;
   contractAbi: Abi | null;
   errorText: string | null;
@@ -27,6 +28,7 @@ interface UseAbi extends AbiState {
 function fromInitial (initialValue: [string | null | undefined, Abi | null | undefined], isRequired: boolean): AbiState {
   return {
     abi: initialValue[0] || null,
+    wasm: initialValue[1]?.project?.source?.wasm.toHex() || null,
     abiName: null,
     contractAbi: initialValue[1] || null,
     errorText: null,
@@ -38,6 +40,7 @@ function fromInitial (initialValue: [string | null | undefined, Abi | null | und
 
 const EMPTY: AbiState = {
   abi: null,
+  wasm: null,
   abiName: null,
   contractAbi: null,
   errorText: null,
@@ -61,12 +64,15 @@ export default function useAbi (initialValue: [string | null | undefined, Abi | 
   const onChangeAbi = useCallback(
     (u8a: Uint8Array, name: string): void => {
       const json = u8aToString(u8a);
+      const contractAbi = new Abi(json, api.registry.getChainProperties());
+      const wasm = contractAbi?.project?.source?.wasm?.toHex()
 
       try {
         setAbi({
           abi: json,
           abiName: name.replace('.contract', '').replace('.json', '').replace('_', ' '),
-          contractAbi: new Abi(json, api.registry.getChainProperties()),
+          contractAbi,
+          wasm,
           errorText: null,
           isAbiError: false,
           isAbiSupplied: true,

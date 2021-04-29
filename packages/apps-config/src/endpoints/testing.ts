@@ -55,6 +55,7 @@ export function createTesting (t: TFunction): LinkOption[] {
     {
       info: 'canvas',
       text: t('rpc.canvas', 'Canvas', { ns: 'apps-config' }),
+      isDisabled: false,
       providers: {
         Parity: 'wss://canvas-rpc.parity.io'
       }
@@ -166,6 +167,7 @@ export function createTesting (t: TFunction): LinkOption[] {
     {
       info: 'jupiter',
       text: t('rpc.jupiter', 'Jupiter', { ns: 'apps-config' }),
+      isDisabled: false,
       providers: {
         Elara: 'wss://jupiter-poa.elara.patract.io',
         Patract: 'wss://ws.jupiter-poa.patract.cn'

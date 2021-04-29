@@ -217,6 +217,7 @@ export function createRococo (t: TFunction): LinkOption[] {
       },
       {
         info: 'rococoJupiter',
+        isDisabled: false,
         paraId: 1010,
         text: t('rpc.rococo.jupiter', 'Patract Jupiter PC1', { ns: 'apps-config' }),
         providers: {

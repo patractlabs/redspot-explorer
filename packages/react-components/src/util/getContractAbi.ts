@@ -5,6 +5,7 @@ import type { AnyJson } from '@polkadot/types/types';
 
 import { Abi } from '@polkadot/api-contract';
 import { api } from '@polkadot/react-api';
+import store from "@polkadot/app-contracts/store";
 
 import getAddressMeta from './getAddressMeta';
 
@@ -16,8 +17,15 @@ export default function getContractAbi (address: string | null): Abi | null {
   let abi: Abi | undefined;
   const meta = getAddressMeta(address, 'contract');
 
+  if(!meta.contract || !(meta.contract as any).codeHash) {
+    return null
+  }
+
   try {
-    const data = meta.contract && JSON.parse(meta.contract.abi) as AnyJson;
+    const codeHash = (meta.contract as any).codeHash
+    const code = store.getCode(codeHash);
+
+    const data = code?.json.abi as AnyJson;
 
     abi = new Abi(data, api.registry.getChainProperties());
   } catch (error) {

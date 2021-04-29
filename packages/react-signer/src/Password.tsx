@@ -44,6 +44,7 @@ function Unlock ({ address, className, error, onChange, onEnter, tabIndex }: Pro
     onChange(password, isUnlockCached);
   }, [onChange, isUnlockCached, password]);
 
+  console.log(pair, pair.isLocked)
   if (!pair || !pair.isLocked || pair.meta.isInjected) {
     return null;
   }

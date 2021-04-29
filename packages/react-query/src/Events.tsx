@@ -3,7 +3,7 @@
 
 import type { IndexedEvent, KeyedEvent } from './types';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useApi } from '@polkadot/react-hooks';
 import { stringToU8a } from '@polkadot/util';
@@ -17,7 +17,13 @@ interface Props {
 
 const MAX_EVENTS = 75;
 
-const EventsContext: React.Context<Events> = React.createContext<Events>([]);
+const EventsContext: React.Context<{
+  events: Events
+}> = React.createContext<{
+  events: Events
+}>({
+  events: [],
+});
 
 function EventsBase ({ children }: Props): React.ReactElement<Props> {
   const { api } = useApi();
@@ -49,6 +55,7 @@ function EventsBase ({ children }: Props): React.ReactElement<Props> {
             return combined;
           }, [])
           .reverse();
+
         const newEventHash = xxhashAsHex(stringToU8a(JSON.stringify(newEvents)));
 
         if (newEventHash !== prevEventHash && newEvents.length) {
@@ -81,8 +88,14 @@ function EventsBase ({ children }: Props): React.ReactElement<Props> {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const value = useMemo(() => {
+    return {
+      events: state
+    }
+  }, [state])
+
   return (
-    <EventsContext.Provider value={state}>
+    <EventsContext.Provider value={value}>
       {children}
     </EventsContext.Provider>
   );

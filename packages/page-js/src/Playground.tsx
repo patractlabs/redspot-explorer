@@ -80,7 +80,7 @@ function Playground ({ basePath, className = '' }: Props): React.ReactElement<Pr
   const [code, setCode] = useState('');
   const [isCustomExample, setIsCustomExample] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [isWarnOpen, toggleWarnOpen] = useToggle(true);
+  const [isWarnOpen, toggleWarnOpen] = useToggle(false);
   const [customExamples, setCustomExamples] = useState<Snippet[]>([]);
   const [logs, setLogs] = useState<Log[]>([]);
   const [options, setOptions] = useState<Snippet[]>([]);
@@ -356,9 +356,9 @@ export default React.memo(styled(Playground)`
       outline: 0;
     }
 
-    .codeflask {
+    /* .codeflask {
       background: transparent;
-    }
+    } */
 
     .codeflask--has-line-numbers {
       z-index: 0;

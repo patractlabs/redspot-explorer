@@ -2,36 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AppProps as Props } from '@polkadot/react-components/types';
-import type { QueryTypes } from './types';
 
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import Queries from './Queries';
+
 import Selection from './Selection';
 
 function StorageApp ({ basePath, className = '' }: Props): React.ReactElement<Props> {
-  const [queue, setQueue] = useState<QueryTypes[]>([]);
-
-  const _onAdd = useCallback(
-    (query: QueryTypes) => setQueue((queue: QueryTypes[]) => [query, ...queue]),
-    []
-  );
-
-  const _onRemove = useCallback(
-    (id: number) => setQueue((queue: QueryTypes[]) => queue.filter((item) => item.id !== id)),
-    []
-  );
-
   return (
     <main className={`storage--App ${className}`}>
       <Selection
         basePath={basePath}
-        onAdd={_onAdd}
-      />
-      <Queries
-        onRemove={_onRemove}
-        value={queue}
       />
     </main>
   );

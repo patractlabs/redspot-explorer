@@ -3,7 +3,7 @@
 
 import type { ConstantCodec } from '@polkadot/metadata/decorate/types';
 import type { ConstValue } from '@polkadot/react-components/InputConsts/types';
-import type { ComponentProps as Props } from '../types';
+import type { ComponentProps as Props, QueryTypes } from '../types';
 
 import React, { useCallback, useState } from 'react';
 
@@ -11,8 +11,11 @@ import { Button, InputConsts } from '@polkadot/react-components';
 import { useApi } from '@polkadot/react-hooks';
 
 import { useTranslation } from '../translate';
+import Queries from '../Queries';
 
-function Consts ({ onAdd }: Props): React.ReactElement<Props> {
+let id = -1;
+
+function Consts ({ }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { api } = useApi();
   const [defaultValue] = useState<ConstValue>((): ConstValue => {
@@ -26,9 +29,21 @@ function Consts ({ onAdd }: Props): React.ReactElement<Props> {
     };
   });
   const [value, setValue] = useState(defaultValue);
+  const [queue, setQueue] = useState<QueryTypes[]>([]);
+
+  const onAdd = useCallback(
+    (query: QueryTypes) => setQueue((queue: QueryTypes[]) => [query, ...queue]),
+    []
+  );
+
+  const _onRemove = useCallback(
+    (id: string) => setQueue((queue: QueryTypes[]) => queue.filter((item) => item.id !== id)),
+    []
+  );
+
 
   const _onAdd = useCallback(
-    () => onAdd({ isConst: true, key: value }),
+    () => onAdd({ isConst: true, key: value, id: `Consts${++id}` }),
     [onAdd, value]
   );
 
@@ -36,6 +51,7 @@ function Consts ({ onAdd }: Props): React.ReactElement<Props> {
   const meta = (api.consts[section][method] as ConstantCodec).meta;
 
   return (
+    <>
     <section className='storage--actionrow'>
       <div className='storage--actionrow-value'>
         <InputConsts
@@ -52,6 +68,11 @@ function Consts ({ onAdd }: Props): React.ReactElement<Props> {
         />
       </div>
     </section>
+    <Queries
+    onRemove={_onRemove}
+    value={queue}
+  />
+</>
   );
 }
 

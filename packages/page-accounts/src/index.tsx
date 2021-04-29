@@ -8,12 +8,11 @@ import { Route, Switch } from 'react-router';
 
 import { HelpOverlay, Tabs } from '@polkadot/react-components';
 import { useAccounts, useIpfs } from '@polkadot/react-hooks';
-
+import Contacts from '@polkadot/app-addresses/Contacts';
 import basicMd from './md/basic.md';
 import Accounts from './Accounts';
 import { useTranslation } from './translate';
 import useCounter from './useCounter';
-import Vanity from './Vanity';
 
 export { useCounter };
 
@@ -31,8 +30,8 @@ function AccountsApp ({ basePath, onStatusChange }: Props): React.ReactElement<P
       text: t<string>('My accounts')
     },
     {
-      name: 'vanity',
-      text: t<string>('Vanity generator')
+      name: 'addresses',
+      text: t<string>('Address book')
     }
   ]);
 
@@ -45,8 +44,8 @@ function AccountsApp ({ basePath, onStatusChange }: Props): React.ReactElement<P
         items={tabsRef.current}
       />
       <Switch>
-        <Route path={`${basePath}/vanity`}>
-          <Vanity
+        <Route path={`${basePath}/addresses`}>
+          <Contacts
             basePath={basePath}
             onStatusChange={onStatusChange}
           />

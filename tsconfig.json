@@ -7,6 +7,8 @@
   "compilerOptions": {
     "jsx": "react",
     "baseUrl": ".",
+    "noUnusedLocals": false,
+    "resolveJsonModule": true,
     "paths": {
       "@polkadot/apps/*": ["packages/apps/src/*"],
       "@polkadot/apps": ["packages/apps/src"],

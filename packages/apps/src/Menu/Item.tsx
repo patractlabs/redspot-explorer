@@ -30,7 +30,7 @@ function Item ({ className = '', isLink, isToplevel, route: { Modal, href, icon,
         rel='noopener noreferrer'
         target={href ? '_blank' : undefined}
       >
-        <Icon icon={icon} />
+        {/* <Icon icon={icon} /> */}
         {text}
         {!!count && (
           <Badge
@@ -51,6 +51,10 @@ export default React.memo(styled(Item)`
   position: relative;
   white-space: nowrap;
 
+  &.ui--MenuItem {
+    margin-bottom: 1rem;
+  }
+
   &.topLevel {
     font-size: 1rem;
     font-weight: 400;
@@ -69,7 +73,7 @@ export default React.memo(styled(Item)`
       color: var(--color-text);
 
       a {
-        background-color: var(--bg-tabs);
+        background-color: #991a51;
       }
     }
 
@@ -77,7 +81,7 @@ export default React.memo(styled(Item)`
       border-radius: 0.15rem 0.15rem 0 0;
 
       a {
-        padding: 0.857rem 1.429rem 0.857rem;
+        /* padding: 0.857rem 1.429rem 0.857rem; */
         cursor: default;
       }
 

@@ -102,6 +102,10 @@ export default React.memo(styled(Table)`
     }
   }
 
+  article {
+    border: none;
+  }
+
   tbody {
     position: relative;
 

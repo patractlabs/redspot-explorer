@@ -435,6 +435,7 @@ export default React.memo(styled(Forks)`
 
       &.header {
         background: #fff;
+        color: var(--color-text-reverse);
         border: 1px solid #e6e6e6;
         border-radius: 0.25rem;
 
@@ -444,6 +445,7 @@ export default React.memo(styled(Forks)`
         }
 
         &.isFinalized {
+          color: var(--color-text);
           background: rgba(0, 255, 0, 0.1);
         }
 

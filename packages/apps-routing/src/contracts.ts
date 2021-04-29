@@ -15,7 +15,7 @@ export default function create (t: TFunction): Route {
         'tx.contracts.call'
       ]
     },
-    group: 'developer',
+    group: 'contracts',
     icon: 'compress',
     name: 'contracts',
     text: t('nav.contracts', 'Contracts', { ns: 'apps-routing' })

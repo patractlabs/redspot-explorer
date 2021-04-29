@@ -15,6 +15,7 @@ import MessageSignature from './MessageSignature';
 export interface Props {
   className?: string;
   index: number;
+  disableExecute?: boolean;
   lastResult?: ContractCallOutcome;
   message: AbiConstructor | AbiMessage;
   onSelect?: (index: number) => void;
@@ -39,7 +40,7 @@ function filterDocs (docs: string[]): string[] {
     });
 }
 
-function Message ({ className = '', index, lastResult, message, onSelect }: Props): React.ReactElement<Props> {
+function Message ({ className = '', disableExecute, index, lastResult, message, onSelect }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const _onSelect = useCallback(
@@ -62,7 +63,7 @@ function Message ({ className = '', index, lastResult, message, onSelect }: Prop
               onClick={_onSelect}
             />
           )
-          : (
+          : disableExecute ? null : (
             <Button
               className='accessory'
               icon='play'
@@ -70,7 +71,7 @@ function Message ({ className = '', index, lastResult, message, onSelect }: Prop
               label={message.isMutating ? t<string>('exec') : t<string>('read')}
               onClick={_onSelect}
             />
-          )
+          ) 
       )}
       <div className='info'>
         <MessageSignature

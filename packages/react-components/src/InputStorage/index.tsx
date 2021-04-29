@@ -6,7 +6,7 @@
 import type { QueryableStorageEntry } from '@polkadot/api/types';
 import type { DropdownOptions } from '../util/types';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useApi } from '@polkadot/react-hooks';
 
@@ -31,6 +31,7 @@ function InputStorage ({ className = '', defaultValue, help, label, onChange, wi
   const [optionsMethod, setOptionsMethod] = useState<DropdownOptions>(() => keyOptions(api, defaultValue.creator.section));
   const [optionsSection] = useState<DropdownOptions>(() => sectionOptions(api));
   const [value, setValue] = useState<QueryableStorageEntry<'promise'>>(() => defaultValue);
+  const defaultValueRef = useRef(defaultValue)
 
   const _onKeyChange = useCallback(
     (newValue: QueryableStorageEntry<'promise'>): void => {

@@ -24,6 +24,7 @@ import dock from './dock';
 import dotmog from './dotmog';
 import dusty from './dusty';
 import eave from './eave';
+import europa from './europa';
 import edgeware from './edgeware';
 import encointerNodeNotee from './encointer-node-notee';
 import encointerNodeTeeproxy from './encointer-node-teeproxy';
@@ -122,7 +123,9 @@ const spec: Record<string, OverrideBundleDefinition> = {
   idavoll,
   'integritee-parachain': integritee,
   ipse,
+  'europa': europa,
   'jupiter-prep': jupiter,
+  'jupiter-dev': jupiter,
   'jupiter-rococo': jupiterRococo,
   'kilt-parachain': kilt,
   kulupu,

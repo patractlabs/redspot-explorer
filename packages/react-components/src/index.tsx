@@ -31,6 +31,7 @@ export { default as ConvictionDropdown } from './ConvictionDropdown';
 export { default as CopyButton } from './CopyButton';
 export { default as CryptoType } from './CryptoType';
 export { default as Digits } from './Digits';
+export { default as Display } from './Display';
 export { default as Dropdown } from './Dropdown';
 export { default as EditButton } from './EditButton';
 export { default as Editor } from './Editor';

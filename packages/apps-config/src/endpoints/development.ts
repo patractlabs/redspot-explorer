@@ -47,6 +47,7 @@ export function createOwn (t: TFunction): LinkOption[] {
 
       return items.map((textBy) => ({
         info: 'local',
+        isDisabled: false,
         text: t('rpc.custom.own', 'Custom', { ns: 'apps-config' }),
         textBy,
         value: textBy
@@ -64,9 +65,33 @@ export function createDev (t: TFunction): LinkOption[] {
     {
       dnslink: 'local',
       info: 'local',
+      isDisabled: false,
       text: t('rpc.local', 'Local Node', { ns: 'apps-config' }),
       textBy: '127.0.0.1:9944',
       value: 'ws://127.0.0.1:9944'
     }
   ];
+}
+
+export function createRedspot (t: TFunction): LinkOption[] {
+  const config = (window as any).redspotConfig
+  if(!config) {
+    return []
+  } else {
+    try {
+      return Object.keys(config.networks).map((name: any) => {
+        const endpoint =  config.networks[name].endpoint
+
+        return {
+          info: 'redspot',
+          isDisabled: false,
+          text: t('rpc.redspot', 'Redspot Network', { ns: 'apps-config' }),
+          textBy: name,
+          value: endpoint
+        }
+      })
+    } catch {
+      return []
+    }
+  }
 }

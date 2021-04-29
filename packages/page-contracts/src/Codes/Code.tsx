@@ -5,9 +5,10 @@ import type { Option } from '@polkadot/types';
 import type { Codec } from '@polkadot/types/types';
 import type { CodeStored } from '../types';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { Button, Card, CopyButton, Forget } from '@polkadot/react-components';
 import { useApi, useCall, useToggle } from '@polkadot/react-hooks';
 
@@ -15,6 +16,8 @@ import { CodeRow, Messages } from '../shared';
 import store from '../store';
 import { useTranslation } from '../translate';
 import useAbi from '../useAbi';
+
+dayjs.extend(relativeTime)
 
 interface Props {
   className?: string;
@@ -33,6 +36,14 @@ function Code ({ className, code, onShowDeploy }: Props): React.ReactElement<Pro
     () => onShowDeploy(code.json.codeHash, 0),
     [code, onShowDeploy]
   );
+  
+  const isMemory = useMemo(() => {
+    return (code.json as any).isMemory
+  }, [code])
+
+  const createdTime = useMemo(() => {
+    return dayjs((code.json as any).whenCreated).fromNow()
+  }, [code])
 
   const _onDeployConstructor = useCallback(
     (constructorIndex = 0): void => {
@@ -85,6 +96,10 @@ function Code ({ className, code, onShowDeploy }: Props): React.ReactElement<Pro
           contractAbi={contractAbi}
           onSelectConstructor={_onDeployConstructor}
           withConstructors
+          constructorsDefault={true}
+          disableExecute={true}
+          withMessages
+          withWasm
         />
       </td>
       <td className='together codeHash'>
@@ -96,11 +111,15 @@ function Code ({ className, code, onShowDeploy }: Props): React.ReactElement<Pro
           optCode.isSome ? t<string>('Available') : t<string>('Not on-chain')
         )}
       </td>
+      <td>
+        {createdTime}
+      </td>
       <td className='button'>
-        <Button
+        {
+          !isMemory && <Button
           icon='trash'
           onClick={toggleIsForgetOpen}
-        />
+        />}
         {!contractAbi && (
           <Button
             icon='upload'

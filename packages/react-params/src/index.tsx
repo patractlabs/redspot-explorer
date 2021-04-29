@@ -35,7 +35,6 @@ interface State {
 }
 
 export { Holder };
-
 class Params extends React.PureComponent<Props, State> {
   public state: State = {
     params: null

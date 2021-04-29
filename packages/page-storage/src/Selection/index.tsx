@@ -1,33 +1,42 @@
 // Copyright 2017-2021 @polkadot/app-storage authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ParitalQueryTypes, QueryTypes } from '../types';
+import type { ParitalQueryTypes } from '../types';
 
-import React, { useCallback, useRef } from 'react';
-import { Route, Switch } from 'react-router';
+import React, { useCallback, useRef, useState } from 'react';
+import { Route, Switch, useLocation } from 'react-router';
 
 import { Tabs } from '@polkadot/react-components';
 
 import { useTranslation } from '../translate';
 import Consts from './Consts';
 import Modules from './Modules';
+import Extrinsics from '@polkadot/app-extrinsics/Selection';
+import Rpc from '@polkadot/app-rpc/Rpc';
 import Raw from './Raw';
-
 interface Props {
   basePath: string;
-  onAdd: (query: QueryTypes) => void;
 }
 
-let id = -1;
 
-function Selection ({ basePath, onAdd }: Props): React.ReactElement<Props> {
+function Selection ({ basePath }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
+
 
   const itemsRef = useRef([
     {
       isRoot: true,
-      name: 'modules',
+      name: 'extrinsics',
+      text: t<string>('Extrinsics')
+    },
+    {
+      name: 'storage',
       text: t<string>('Storage')
+    },
+    {
+      name: 'rpc',
+      text: t<string>('RPC calls')
     },
     {
       name: 'constants',
@@ -36,25 +45,23 @@ function Selection ({ basePath, onAdd }: Props): React.ReactElement<Props> {
     {
       name: 'raw',
       text: t<string>('Raw storage')
-    }
+    },
   ]);
 
-  const _onAdd = useCallback(
-    (query: ParitalQueryTypes): void => onAdd({ ...query, id: ++id }),
-    [onAdd]
-  );
-
+  
   return (
     <>
       <Tabs
         basePath={basePath}
         items={itemsRef.current}
       />
-      <Switch>
-        <Route path={`${basePath}/constants`}><Consts onAdd={_onAdd} /></Route>
-        <Route path={`${basePath}/raw`}><Raw onAdd={_onAdd} /></Route>
-        <Route><Modules onAdd={_onAdd} /></Route>
-      </Switch>
+      <div>
+        <div style={{ display: pathname === '/chain/storage' ? 'block' : 'none'}}><Modules /></div>
+        <div style={{ display: pathname === '/chain/constants' ? 'block' : 'none'}}><Consts /></div>
+        <div style={{ display: pathname === '/chain/raw' ? 'block' : 'none'}}><Raw /></div>
+        <div style={{ display: pathname === '/chain/rpc' ? 'block' : 'none'}}><Rpc /></div>
+        <div style={{ display: pathname === '/chain' ? 'block' : 'none'}}><Extrinsics /></div>
+      </div>
     </>
   );
 }
