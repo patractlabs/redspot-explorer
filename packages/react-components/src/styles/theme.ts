@@ -10,12 +10,12 @@ export const colorBtnShadow = '#98999a';
 export const colorBtnHighlight = '#f19135';
 
 /* primary buttons, blue */
-export const colorBtnPrimary = colorBtnDefault; // '#2e86ab';
+export const colorBtnPrimary = colorBtnDefault; // '#97e1f1';
 
 /* button text color */
 export const colorBtnText = '#f9f8f7';
 
-export const colorLink = '#2e86ab';
+export const colorLink = '#97e1f1';
 
 export default `
   .theme--dark,

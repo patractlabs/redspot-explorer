@@ -179,7 +179,7 @@ function Endpoints ({ className = '', offset, onClose }: Props): React.ReactElem
 
     try {
       localStorage.setItem(CUSTOM_ENDPOINT_KEY, JSON.stringify(newStoredCurstomEndpoints));
-      setGroups(combineEndpoints(createWsEndpoints(t)));
+      // setGroups(combineEndpoints(createWsEndpoints(t)));
       setStoredCustomEndpoints(getCustomEndpoints());
     } catch (e) {
       console.error(e);
@@ -223,6 +223,16 @@ function Endpoints ({ className = '', offset, onClose }: Props): React.ReactElem
     },
     [apiUrl, onClose]
   );
+  
+  const redspotProviders = useMemo(() => {
+    return groups.find(({ header}) => header === 'Redspot')?.networks.find(({ name }) => name === 'Redspot Network')?.providers || []
+  }, [groups])
+
+  // const isSelected = useMemo(
+  //   () => redspotProviders.some(({ url }) => url === apiUrl),
+  //   [apiUrl, redspotProviders]
+  // );
+
 
   return (
     <Sidebar
@@ -239,7 +249,7 @@ function Endpoints ({ className = '', offset, onClose }: Props): React.ReactElem
       onClose={onClose}
       position='left'
     >
-      {groups.map((group, index): React.ReactNode => (
+      {/* {groups.map((group, index): React.ReactNode => (
         <GroupDisplay
           affinities={affinities}
           apiUrl={apiUrl}
@@ -276,7 +286,42 @@ function Endpoints ({ className = '', offset, onClose }: Props): React.ReactElem
             </div>
           )}
         </GroupDisplay>
-      ))}
+      ))} */}
+      <div className="menuItems">
+      {
+        redspotProviders.map(({name, url}) => {
+          return <div className={`ui--MenuItem ${url === apiUrl ? 'isActive': ''}`}>
+            <a onClick={() => _setApiUrl(name, url)}>
+              {name}
+              <div className="ui--MenuItemUrl">{url}</div>
+            </a>
+          </div>
+        })
+      }
+      </div> 
+      <div className='endpointCustomWrapper'>
+        <Input
+          className='endpointCustom'
+          isError={!isUrlValid}
+          isFull
+          label={t<string>('endpoint')}
+          onChange={_onChangeCustom}
+          value={apiUrl}
+        />
+        {isSavedCustomEndpoint
+          ? <Button
+            className='customButton'
+            icon='trash-alt'
+            onClick={_removeApiEndpoint}
+          />
+          : <Button
+            className='customButton'
+            icon='save'
+            isDisabled={!isUrlValid || isKnownUrl}
+            onClick={_saveApiEndpoint}
+          />
+        }
+      </div>
     </Sidebar>
   );
 }
@@ -299,5 +344,89 @@ export default React.memo(styled(Endpoints)`
 
   .endpointCustomWrapper {
     position: relative;
+  }
+
+  .menuItems {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .ui--MenuItem {
+    &.ui--MenuItem {
+      margin-bottom: 1rem;
+    }
+
+
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.214rem;
+    border-radius: 0.15rem;
+
+    a {
+      padding: 0.857rem 0.857em 0.857rem 1rem;
+      line-height: 1.214rem;
+      border-radius: 0.25rem;
+    }
+
+    &.isActive {
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--color-text);
+
+      a {
+        background-color: #991a51;
+      }
+    }
+
+    &.isActive {
+      border-radius: 0.15rem 0.15rem 0 0;
+
+      a {
+        /* padding: 0.857rem 1.429rem 0.857rem; */
+        cursor: default;
+      }
+    }
+
+    a {
+      color: inherit !important;
+      display: block;
+      padding: 0.5rem 1.15rem 0.57rem;
+      text-decoration: none;
+      font-weight: 400;
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+
+    &.isActive .ui--MenuItemUrl {
+      color: #ffffff;
+    }
+  }
+
+  .network {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .ui--MenuItemUrl {
+    margin-top: 0;
+    margin-bottom: 0;
+    color: #97e1f1;
+  }
+
+  .networkItem {
+    border-radius: 0.25rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.75rem 1rem;
+    position: relative;
+    text-transform: uppercase;
+
+    &:hover {
+      background: var(--bg-table);
+    }
+
+    .ui--Icon {
+      margin-right: 0.5rem;
+    }
   }
 `);
