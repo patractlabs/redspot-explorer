@@ -31,8 +31,6 @@ export const Updater = () => {
 
         const currentNetworkConfig = currentNetwork && config.networks[currentNetwork];
 
-        console.log(currentNetworkConfig);
-
         if (currentNetworkConfig) {
           try {
             if (

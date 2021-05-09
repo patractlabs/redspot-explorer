@@ -24,7 +24,7 @@ export const useLoadAbi = () => {
             abi.source.hash,
             {
               abi,
-              name: `${abi.contract.name}-${abi.source.hash.slice(2, 6)}`,
+              name: `${abi.contract.name}-${abi.source.hash.slice(2, 8)}`,
               tags: []
             },
             true

@@ -99,7 +99,7 @@ function Deploy ({ codeHash, constructorIndex = 0, onClose, setConstructorIndex 
             codeHash,
             genesisHash: api.genesisHash.toHex()
           },
-          name: `${name}(${result.contract.address.toString().slice(0, 4)})`,
+          name: `${name}(${result.contract.address.toString().slice(0, 6)})`,
           tags: []
         });
 

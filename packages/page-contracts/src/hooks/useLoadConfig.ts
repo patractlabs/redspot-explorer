@@ -22,7 +22,7 @@ export const useLoadAbi = () => {
 
           await store.saveCode(abi.source.hash, {
             abi,
-            name: `${abi.contract.name}-${abi.source.hash.slice(2, 6)}`,
+            name: `${abi.contract.name}-${abi.source.hash.slice(2, 8)}`,
             tags: []
           }, true);
         }
