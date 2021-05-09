@@ -18,6 +18,7 @@ import { createValue } from './values';
 interface Props extends I18nProps {
   children?: React.ReactNode;
   isDisabled?: boolean;
+  isContractParam?: boolean;
   onChange?: (value: RawParams) => void;
   onEnter?: () => void;
   onError?: () => void;
@@ -78,7 +79,7 @@ class Params extends React.PureComponent<Props, State> {
   }
 
   public render (): React.ReactNode {
-    const { children, className = '', isDisabled, onEnter, onEscape, overrides, params, registry = api.registry, withBorder = true } = this.props;
+    const { children, className = '', isDisabled, onEnter, onEscape, overrides, params, registry = api.registry, withBorder = true, isContractParam } = this.props;
     const { values = this.props.values } = this.state;
 
     if (!values || !values.length) {
@@ -94,6 +95,7 @@ class Params extends React.PureComponent<Props, State> {
           <div className='ui--Params-Content'>
             {values && params.map(({ name, type }: ParamDef, index: number): React.ReactNode => (
               <ParamComp
+                isContractParam={isContractParam}
                 defaultValue={values[index]}
                 index={index}
                 isDisabled={isDisabled}

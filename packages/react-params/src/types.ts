@@ -35,6 +35,7 @@ export interface Props {
   isInOption?: boolean;
   isReadOnly?: boolean;
   isOptional?: boolean;
+  isContractParam?: boolean;
   label?: React.ReactNode;
   name?: string;
   onChange?: RawParamOnChange;

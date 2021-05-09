@@ -11,7 +11,7 @@ import { isUndefined } from '@polkadot/util';
 import findComponent from './findComponent';
 import Static from './Static';
 
-function Param ({ className = '', defaultValue, isDisabled, isInOption, isOptional, name, onChange, onEnter, onEscape, overrides, registry, type }: Props): React.ReactElement<Props> | null {
+function Param ({ className = '', defaultValue, isDisabled, isInOption, isOptional, name, onChange, onEnter, onEscape, overrides, registry, type, isContractParam }: Props): React.ReactElement<Props> | null {
   const Component = useMemo(
     () => findComponent(registry, type, overrides),
     [registry, type, overrides]
@@ -45,6 +45,7 @@ function Param ({ className = '', defaultValue, isDisabled, isInOption, isOption
         key={`${name || 'unknown'}:${type.toString()}`}
         label={label}
         name={name}
+        isContractParam={isContractParam}
         onChange={onChange}
         onEnter={onEnter}
         onEscape={onEscape}

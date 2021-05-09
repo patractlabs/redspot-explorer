@@ -46,17 +46,18 @@ function EventDisplay ({ children, className = '', value }: Props): React.ReactE
   const { api } = useApi();
   
   const isAbiEvent = useMemo(() => {
-    return value.section === 'contracts' && value.method === 'ContractEmitted'  && value.data.length === 2
+    return value.section === 'contracts' && (value.method === 'ContractEmitted' || value.method === 'ContractExecution')  && value.data.length === 2
   }, [value])
 
   const getAbiEvent = useCallback(
     async () => {
       // for contracts, we decode the actual event
-      if (value.section === 'contracts' && value.method === 'ContractEmitted' && value.data.length === 2) {
+      if (value.section === 'contracts' && (value.method === 'ContractEmitted' || value.method === 'ContractExecution') && value.data.length === 2) {
         // see if we have info for this contract
         const [accountId, encoded] = value.data;
 
         let abi: Abi | null;
+        
         try {
           abi = getContractAbi(accountId.toString()) 
 
@@ -112,6 +113,7 @@ function EventDisplay ({ children, className = '', value }: Props): React.ReactE
             />
             <Params
               isDisabled
+              isContractParam={true}
               params={abiEvent.event.args}
               values={abiEvent.values}
             />
