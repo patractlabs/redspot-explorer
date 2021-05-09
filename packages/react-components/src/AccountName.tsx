@@ -140,7 +140,7 @@ function AccountName ({ children, className = '', defaultName, label, onClick, o
   useEffect((): void => {
     const { accountId, accountIndex, identity, nickname } = info || {};
     const cacheAddr = (accountId || value || '').toString();
-
+    
     if (identity?.parent) {
       parentCache.set(cacheAddr, identity.parent.toString());
     }
