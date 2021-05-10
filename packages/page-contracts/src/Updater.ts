@@ -29,6 +29,8 @@ export const Updater = () => {
           return config.networks[name].endpoint === settings.apiUrl;
         });
 
+        (window as any).currentNetwork = currentNetwork
+
         const currentNetworkConfig = currentNetwork && config.networks[currentNetwork];
 
         if (currentNetworkConfig) {

@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MonacoEditorPlugin = require('monaco-editor-webpack-plugin');
 const webpack = require('webpack');
 
 const findPackages = require('../../scripts/findPackages.cjs');
@@ -160,6 +161,9 @@ function createWebpack (context, mode = 'production') {
       new webpack.optimize.SplitChunksPlugin(),
       new MiniCssExtractPlugin({
         filename: '[name].[contenthash:8].css'
+      }),
+      new MonacoEditorPlugin({
+        languages: ['javascript', 'typescript', 'json']
       })
     ].concat(plugins),
     resolve: {
