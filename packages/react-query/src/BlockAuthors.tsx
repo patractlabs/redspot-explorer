@@ -4,7 +4,7 @@
 import type { HeaderExtended } from '@polkadot/api-derive/types';
 import type { EraRewardPoints } from '@polkadot/types/interfaces';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useApi, useCall } from '@polkadot/react-hooks';
 import { formatNumber } from '@polkadot/util';
@@ -30,10 +30,40 @@ const BlockAuthorsContext: React.Context<Authors> = React.createContext<Authors>
 const ValidatorsContext: React.Context<string[]> = React.createContext<string[]>([]);
 
 function BlockAuthorsBase ({ children }: Props): React.ReactElement<Props> {
-  const { api, isApiReady } = useApi();
+  const { api, isApiReady, systemName } = useApi();
   const queryPoints = useCall<EraRewardPoints>(isApiReady && api.derive.staking?.currentPoints);
   const [state, setState] = useState<Authors>({ byAuthor, eraPoints, lastBlockAuthors: [], lastHeaders: [] });
+  const stateRef = useRef<Authors>({ byAuthor, eraPoints, lastBlockAuthors: [], lastHeaders: [] });
   const [validators, setValidators] = useState<string[]>([]);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  const parentHash = useMemo(() => {
+    if (state.lastHeaders.length > 0) {
+      return state.lastHeaders[state.lastHeaders.length - 1].parentHash;
+    } else {
+      return null;
+    }
+  }, [state.lastHeaders]);
+
+  useEffect((): void => {
+    if (systemName !== 'Europa Dev Node') return;
+
+    if (!parentHash || parentHash.isEmpty) return;
+
+    if (!isApiReady) return;
+
+    api.derive.chain.getHeader(parentHash).then((header) => {
+      if (header) {
+        setState({
+          ...stateRef.current,
+          lastHeaders: [...stateRef.current.lastHeaders, header]
+        });
+      }
+    }).catch(console.error);
+  }, [api, isApiReady, parentHash, systemName]);
 
   useEffect((): void => {
     // No unsub, global context - destroyed on app close
