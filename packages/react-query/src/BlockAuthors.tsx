@@ -16,6 +16,7 @@ export interface Authors {
   lastBlockNumber?: string;
   lastHeader?: HeaderExtended;
   lastHeaders: HeaderExtended[];
+  historyHeaders: HeaderExtended[];
 }
 
 interface Props {
@@ -26,14 +27,14 @@ const MAX_HEADERS = 75;
 
 const byAuthor: Record<string, string> = {};
 const eraPoints: Record<string, string> = {};
-const BlockAuthorsContext: React.Context<Authors> = React.createContext<Authors>({ byAuthor, eraPoints, lastBlockAuthors: [], lastHeaders: [] });
+const BlockAuthorsContext: React.Context<Authors> = React.createContext<Authors>({ byAuthor, eraPoints, historyHeaders: [], lastBlockAuthors: [], lastHeaders: [] });
 const ValidatorsContext: React.Context<string[]> = React.createContext<string[]>([]);
 
 function BlockAuthorsBase ({ children }: Props): React.ReactElement<Props> {
   const { api, isApiReady, systemName } = useApi();
   const queryPoints = useCall<EraRewardPoints>(isApiReady && api.derive.staking?.currentPoints);
-  const [state, setState] = useState<Authors>({ byAuthor, eraPoints, lastBlockAuthors: [], lastHeaders: [] });
-  const stateRef = useRef<Authors>({ byAuthor, eraPoints, lastBlockAuthors: [], lastHeaders: [] });
+  const [state, setState] = useState<Authors>({ byAuthor, eraPoints, historyHeaders: [], lastBlockAuthors: [], lastHeaders: [] });
+  const stateRef = useRef<Authors>({ byAuthor, eraPoints, historyHeaders: [], lastBlockAuthors: [], lastHeaders: [] });
   const [validators, setValidators] = useState<string[]>([]);
 
   useEffect(() => {
@@ -41,12 +42,16 @@ function BlockAuthorsBase ({ children }: Props): React.ReactElement<Props> {
   }, [state]);
 
   const parentHash = useMemo(() => {
-    if (state.lastHeaders.length > 0) {
-      return state.lastHeaders[state.lastHeaders.length - 1].parentHash;
+    if (state.historyHeaders.length > 0) {
+      return state.historyHeaders[state.historyHeaders.length - 1].parentHash;
     } else {
-      return null;
+      if (state.lastHeaders.length > 0) {
+        return state.lastHeaders[state.lastHeaders.length - 1].parentHash;
+      } else {
+        return null;
+      }
     }
-  }, [state.lastHeaders]);
+  }, [state.historyHeaders, state.lastHeaders]);
 
   useEffect((): void => {
     if (systemName !== 'Europa Dev Node') return;
@@ -59,7 +64,7 @@ function BlockAuthorsBase ({ children }: Props): React.ReactElement<Props> {
       if (header) {
         setState({
           ...stateRef.current,
-          lastHeaders: [...stateRef.current.lastHeaders, header]
+          historyHeaders: [...stateRef.current.historyHeaders, header]
         });
       }
     }).catch(console.error);
@@ -104,7 +109,7 @@ function BlockAuthorsBase ({ children }: Props): React.ReactElement<Props> {
             }, [lastHeader])
             .sort((a, b) => b.number.unwrap().cmp(a.number.unwrap()));
 
-          setState({ byAuthor, eraPoints, lastBlockAuthors: lastBlockAuthors.slice(), lastBlockNumber, lastHeader, lastHeaders });
+          setState({ byAuthor, eraPoints, historyHeaders: stateRef.current.historyHeaders, lastBlockAuthors: lastBlockAuthors.slice(), lastBlockNumber, lastHeader, lastHeaders });
         }
       }).catch(console.error);
     }).catch(console.error);

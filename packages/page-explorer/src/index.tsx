@@ -27,8 +27,8 @@ const HIDDESN_NOBABE = ['forks'];
 function ExplorerApp ({ basePath, className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { api } = useApi();
-  const { lastHeaders } = useContext(BlockAuthorsContext);
-  const {events} = useContext(EventsContext);
+  const { historyHeaders, lastHeaders } = useContext(BlockAuthorsContext);
+  const { events } = useContext(EventsContext);
 
   const itemsRef = useRef([
     {
@@ -66,7 +66,7 @@ function ExplorerApp ({ basePath, className }: Props): React.ReactElement<Props>
         <Route>
           <Main
             events={events}
-            headers={lastHeaders}
+            headers={lastHeaders.concat(historyHeaders)}
           />
         </Route>
       </Switch>
