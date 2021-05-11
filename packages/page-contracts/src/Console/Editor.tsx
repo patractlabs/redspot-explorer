@@ -28,7 +28,7 @@ const initCode = `
 
     console.log("Balance: ", balance.toHuman());
 
-    const contract = await contractFactory.deployed("new", "1000000", {
+    const contract = await contractFactory.deploy("new", "1000000", {
       gasLimit: "200000000000",
       value: "100000000000",
     });

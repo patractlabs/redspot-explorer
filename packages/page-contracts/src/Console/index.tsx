@@ -62,13 +62,17 @@ function Console ({ basePath, className = '' }: Props): React.ReactElement<Props
   const onCompile = (): void => {
     setIsCompile(true)
     try {
-      client?.emit('compile', () => {
-        setIsCompile(false)
-        queueAction && queueAction({
-          action: 'contract',
-          message: 'compiled',
-          status: 'queued'
-        });
+      client?.emit('compile', (error: any) => {
+        if(error) {
+          throw error
+        } else {
+          setIsCompile(false)
+          queueAction && queueAction({
+            action: 'contract',
+            message: 'compiled',
+            status: 'queued'
+          });
+        }
       })
     } catch(error) {
       queueAction && queueAction({
