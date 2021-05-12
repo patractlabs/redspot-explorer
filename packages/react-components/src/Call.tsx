@@ -94,6 +94,8 @@ function extractState (value: IExtrinsic | IMethod, withHash?: boolean, withSign
       : null;
   }
 
+  // console.log('params', params, values[3]?.value.toHuman());
+
   return { hash, params, signature, signatureType, values };
 }
 
@@ -102,6 +104,8 @@ function Call ({ children, className = '', labelHash, labelSignature, mortality,
   const [{ hash, params, signature, signatureType, values }, setExtracted] = useState<Extracted>({ hash: null, params: [], signature: null, signatureType: null, values: [] });
 
   useEffect((): void => {
+    console.log('extractState', value.args[3]?.toString(), value, value.toHuman(), value.meta.toHuman());
+
     setExtracted(extractState(value, withHash, withSignature));
   }, [value, withHash, withSignature]);
 

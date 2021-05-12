@@ -1,4 +1,6 @@
 {
+  "block": "区块",
+  "method": "方法",
   "No Related Extrinsics": "暂无相关交易",
   "Related Extrinsics": "相关交易",
   "//hard": "硬",

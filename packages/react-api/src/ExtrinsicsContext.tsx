@@ -7,6 +7,7 @@ import React, { Context, useEffect, useRef, useState } from 'react';
 
 import { ApiPromise } from '@polkadot/api';
 import { useApi } from '@polkadot/react-hooks';
+import { stringToU8a, u8aToHex } from '@polkadot/util';
 
 export interface Extrinsic {
   contract: string;
@@ -93,26 +94,26 @@ const retriveBlocksFromEuropaNode = async (api: ApiPromise, startIndex = 1): Pro
 
 const transformBlock = (block: SignedBlock, number: number): Block => {
   const extrinsics: Extrinsic[] = block.block.extrinsics
-    .map((e, index) => {
-      const dest: { id: string } = e.args[0]?.toJSON() as { id: string };
+    .map((extrinsic, index) => {
+      const dest: { id: string } = extrinsic.args[0]?.toJSON() as { id: string };
 
       return {
-        args: e.args.map((a) => a.toString()),
-        callIndex: e.callIndex.toString(),
+        args: extrinsic.args.map((a) => a.toString()),
+        callIndex: extrinsic.callIndex.toString(),
         contract: dest.id,
-        createdAtHash: e.createdAtHash?.toString(),
-        data: e.args[3]?.toString() || '',
-        hash: e.hash.toString(),
+        createdAtHash: extrinsic.createdAtHash?.toString(),
+        data: u8aToHex(extrinsic.args[3]?.toU8a() || stringToU8a('')),
+        hash: extrinsic.hash.toString(),
         index,
-        isSigned: e.isSigned,
-        method: e.method.toHuman() as { method: string, section: string },
-        nonce: e.nonce.toNumber(),
-        signature: e.signature.toString(),
-        signer: e.signer.toString(),
-        type: e.type
+        isSigned: extrinsic.isSigned,
+        method: extrinsic.method.toHuman() as { method: string, section: string },
+        nonce: extrinsic.nonce.toNumber(),
+        signature: extrinsic.signature.toString(),
+        signer: extrinsic.signer.toString(),
+        type: extrinsic.type
       };
     })
-    .filter((e) => e.method.section === 'contracts' && e.method.method === 'call');
+    .filter((extrinsic) => extrinsic.method.section === 'contracts' && extrinsic.method.method === 'call');
 
   return {
     extrinsics,
@@ -151,7 +152,7 @@ const ExtrisnicsProvider = React.memo(function Api ({ children }: Props): React.
     if (systemName.toLowerCase().includes('europa')) {
       initPromise = retriveBlocksFromEuropaNode(api, 1).then(
         (_blocks) => {
-          const blocks = _blocks.map((block) => transformBlock(block.block, block.height));
+          const blocks = _blocks.map((block) => transformBlock(block.block, block.height)).filter((block) => !!block.extrinsics.length);
 
           blocksRef.current = blocks;
           setBlocks(blocks);
@@ -175,7 +176,7 @@ const ExtrisnicsProvider = React.memo(function Api ({ children }: Props): React.
 
         api.rpc.chain.getBlock(header.hash.toString()).then((block) => {
           const newBlock = transformBlock(block, header.number.toNumber());
-          const newBlocks = patchBlocks(blocksRef.current, [newBlock]);
+          const newBlocks = patchBlocks(blocksRef.current, newBlock.extrinsics.length ? [newBlock] : []);
 
           blocksRef.current = newBlocks;
           setBlocks(newBlocks);

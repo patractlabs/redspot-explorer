@@ -1,4 +1,7 @@
 {
+  "block": "block",
+  "method": "method",
+  "extrinsic hash": "extrinsic hash",
   "No Related Extrinsics": "No Related Extrinsics",
   "Related Extrinsics": "Related Extrinsics",
   "Close": "Close",
