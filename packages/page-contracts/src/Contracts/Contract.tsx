@@ -93,17 +93,6 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
 
   return (
     <tr className={className}>
-      {
-        isExtrinsicsOpen &&
-          <Extrinsics
-            contract={contract}
-            contractAddress={contract.address.toString()}
-            onClose={() => toggleIsExtrinsicsOpen(false)} />
-      }
-      <td>
-        <a
-          onClick={() => toggleIsExtrinsicsOpen(true)}> {t('Related Extrinsics')} </a>
-      </td>
       <td className='address top'>
         {isForgetOpen && (
           <Forget
@@ -115,6 +104,16 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
           />
         )}
         <AddressMini value={contract.address} />
+      </td>
+      <td>
+        {
+          isExtrinsicsOpen &&
+            <Extrinsics
+              contract={contract}
+              contractAddress={contract.address.toString()}
+              onClose={() => toggleIsExtrinsicsOpen(false)} />
+        }
+        <a onClick={() => toggleIsExtrinsicsOpen(true)}> {t('extrinsics')} </a>
       </td>
       <td className='all top'>
         <Messages

@@ -92,8 +92,8 @@ export const Extrinsics: FC<{
     <Modal header={t('Related Extrinsics')}>
       <Modal.Content>
         <TableNoMargin
-          header={headerRef.current}
-          empty={t<string>('No Related Extrinsics')}>
+          empty={t<string>('No Related Extrinsics')}
+          header={headerRef.current}>
           {
             extrisnics.map((extrisnic) =>
               <tr key={extrisnic.hash}>

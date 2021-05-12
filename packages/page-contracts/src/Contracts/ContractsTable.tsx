@@ -45,10 +45,11 @@ function ContractsTable ({ contracts: keyringContracts }: Props): React.ReactEle
 
   const headerRef = useRef<[string?, string?, number?][]>([
     [t('contracts'), 'start'],
+    [t('extrinsics'), 'start'],
     [undefined, undefined, 3],
     [t('status'), 'start'],
     [t('projection'), 'media--1100'],
-    [t("upload time"), "start"],
+    [t('upload time'), 'start'],
     []
   ]);
 
