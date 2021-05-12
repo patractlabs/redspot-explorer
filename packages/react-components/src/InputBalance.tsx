@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BitLengthOption } from '@polkadot/react-components/constants';
+import { Tooltip } from '@polkadot/react-components';
 import { BN_TEN, formatBalance, isBn } from '@polkadot/util';
 
 import InputNumber from './InputNumber';
@@ -19,6 +20,7 @@ interface Props {
   defaultValue?: BN | string;
   help?: React.ReactNode;
   isDisabled?: boolean;
+  isContractParam?: boolean;
   isError?: boolean;
   isFull?: boolean;
   isWarning?: boolean;
@@ -68,9 +70,9 @@ function reformat (value: string | BN, isDisabled?: boolean): string {
   return formatBalance(value, { forceUnit: '-', withSi: false }).replace(',', isDisabled ? ',' : '');
 }
 
-function InputBalance ({ autoFocus, children, className = '', defaultValue: inDefault, help, isDisabled, isError, isFull, isWarning, isZeroable, label, labelExtra, maxValue, onChange, onEnter, onEscape, placeholder, value, withEllipsis, withLabel, withMax }: Props): React.ReactElement<Props> {
+function InputBalance ({ autoFocus, children, className = '', defaultValue: inDefault, help, isDisabled, isError, isFull, isWarning, isZeroable, label, labelExtra, maxValue, onChange, onEnter, onEscape, placeholder, value, withEllipsis, withLabel, withMax, isContractParam }: Props): React.ReactElement<Props> {
   const defaultValue = useMemo(
-    () => inDefault ? reformat(inDefault, isDisabled) : undefined,
+    () => inDefault ? isContractParam ? inDefault : reformat(inDefault, isDisabled) : undefined,
     [inDefault, isDisabled]
   );
 
@@ -84,7 +86,7 @@ function InputBalance ({ autoFocus, children, className = '', defaultValue: inDe
       isDisabled={isDisabled}
       isError={isError}
       isFull={isFull}
-      isSi
+      isSi={!isContractParam}
       isWarning={isWarning}
       isZeroable={isZeroable}
       label={label}

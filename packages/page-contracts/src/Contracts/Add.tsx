@@ -32,7 +32,7 @@ function Add ({ onClose }: Props): React.ReactElement {
     const hash = contractAbi?.project?.source?.wasmHash?.toString();
     
     if (name && hash) {
-      return [`${name}-${hash.slice(2,6)}`, hash];
+      return [`${name}-${hash.slice(2, 8)}`, hash];
     } else {
       return [];
     }
@@ -59,7 +59,7 @@ function Add ({ onClose }: Props): React.ReactElement {
             abi,
             genesisHash: api.genesisHash.toHex()
           },
-          name: `${name}(${address.toString().slice(0, 4)})`,
+          name: `${name}(${address.toString().slice(0, 6)})`,
           tags: []
         };
 

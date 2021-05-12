@@ -505,7 +505,7 @@ export default withMulti(
           .summary {
             display: inline-block;
             text-align: right;
-            min-width: 12rem;
+            min-width: 14rem;
           }
         }
       }

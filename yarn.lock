@@ -2231,6 +2231,7 @@ __metadata:
     "@babel/runtime": ^7.13.17
     "@polkadot/api-contract": ^4.6.3-8
     dayjs: ^1.10.4
+    monaco-editor: ^0.23.0
     socket.io-client: ^4.0.1
   languageName: unknown
   linkType: soft
@@ -13304,6 +13305,25 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"monaco-editor-webpack-plugin@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "monaco-editor-webpack-plugin@npm:3.0.1"
+  dependencies:
+    loader-utils: ^2.0.0
+  peerDependencies:
+    monaco-editor: 0.22.x || 0.23.x
+    webpack: ^4.5.0 || 5.x
+  checksum: 64787c446cea67af09749512c1a6daefd0857046b7a787faadb2fb800cc3ebaefae80abadbc140c04866771a44a213500bd7248910530716c47c1eac9b955174
+  languageName: node
+  linkType: hard
+
+"monaco-editor@npm:^0.23.0":
+  version: 0.23.0
+  resolution: "monaco-editor@npm:0.23.0"
+  checksum: 505de80fdea26359eff9837f2d9fd033e45de81e8e07f22464c0dd41aff386601489b9e579e8c962c3b1a6ed5690e936c09f84354d31d1f8bac7ed59e1ebf291
+  languageName: node
+  linkType: hard
+
 "moonbeam-types-bundle@npm:1.1.12":
   version: 1.1.12
   resolution: "moonbeam-types-bundle@npm:1.1.12"
@@ -14674,6 +14694,7 @@ fsevents@~2.1.2:
     electron-builder: ^22.10.5
     electron-builder-notarize: ^1.2.0
     i18next-scanner: ^3.0.0
+    monaco-editor-webpack-plugin: ^3.0.1
     react: ^17.0.2
     react-dom: ^17.0.2
     react-is: ^17.0.2

@@ -12,6 +12,7 @@ import { Display } from '@polkadot/react-components';
 import introMd from './md/intro.md';
 import Contracts from './Contracts';
 import Codes from './Codes';
+import Console from './Console';
 
 function ContractsApp ({ basePath, className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -23,8 +24,12 @@ function ContractsApp ({ basePath, className = '' }: Props): React.ReactElement<
       text: t('Codes')
     },
     {
-      name: 'playground',
+      name: 'contract',
       text: t('Contracts')
+    },
+    {
+      name: 'console',
+      text: t('Console')
     },
   ]);
 
@@ -35,11 +40,14 @@ function ContractsApp ({ basePath, className = '' }: Props): React.ReactElement<
         basePath={basePath}
         items={itemsRef.current}
       />
-      <Display path="/contracts/playground">
+      <Display path="/contracts/contract">
         <Contracts />
       </Display>
       <Display path="/contracts">
         <Codes />
+      </Display>
+      <Display isHide={true} path="/contracts/console">
+        <Console />
       </Display>
     </main>
   );

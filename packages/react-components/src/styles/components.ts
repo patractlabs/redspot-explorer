@@ -40,7 +40,7 @@ export default (_theme: ThemeDef): string => `
     padding-right: 0;
     padding-bottom: 0.3em;
     padding-left: 0.3em;
-    color: #2e86ab  !important;
+    color: #97e1f1  !important;
     background: none  !important;
   }
 

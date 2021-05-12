@@ -7,6 +7,7 @@
     "@babel/runtime": "^7.13.17",
     "@polkadot/api-contract": "^4.6.3-8",
     "dayjs": "^1.10.4",
+    "monaco-editor": "^0.23.0",
     "socket.io-client": "^4.0.1"
   }
 }

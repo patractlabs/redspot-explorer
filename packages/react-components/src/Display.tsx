@@ -7,11 +7,19 @@ import { useLocation } from "react-router";
 interface Props {
   path: string;
   children: React.ReactNode;
+  isHide?: boolean;
 }
 
-function Display({ path, children }: Props): React.ReactElement<Props> {
+function Display({ path, children, isHide }: Props): React.ReactElement<Props> {
   const { pathname } = useLocation();
 
+  if (isHide) {
+    return path === pathname ? (
+      <div style={{ display: path === pathname ? "block" : "none" }}>{children}</div>
+    ) : (
+      <div></div>
+    );
+  }
   return <div style={{ display: path === pathname ? "block" : "none" }}>{children}</div>;
 }
 

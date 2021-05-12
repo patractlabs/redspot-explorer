@@ -24,17 +24,17 @@ function Add({ onClose }: Props): React.ReactElement {
   const [name, codeHash] = useMemo(() => {
     const name = contractAbi?.project?.contract?.name?.toString();
     const hash = contractAbi?.project?.source?.wasmHash?.toString();
-    
+
     if (name && hash) {
-      return [`${name}-${hash.slice(2,6)}`, hash];
+      return [`${name}-${hash.slice(2, 8)}`, hash];
     } else {
       return [];
     }
   }, [contractAbi]);
 
   const source = useMemo(() => {
-    return contractAbi?.project?.source
-  }, [contractAbi])
+    return contractAbi?.project?.source;
+  }, [contractAbi]);
 
   const _onSave = useCallback((): void => {
     if (!codeHash || !name) {

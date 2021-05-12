@@ -8,6 +8,8 @@ import { useApi } from "@polkadot/react-hooks";
 import { settings } from "@polkadot/ui-settings";
 import { io } from "socket.io-client";
 import { web3FromSource } from "@polkadot/extension-dapp";
+import store from "store";
+import { getSpecAlias, getSpecTypes, getSpecHasher } from "@polkadot/types-known";
 
 export const Updater = () => {
   const { isApiReady, api } = useApi();
@@ -27,9 +29,52 @@ export const Updater = () => {
           return config.networks[name].endpoint === settings.apiUrl;
         });
 
+        (window as any).currentNetwork = currentNetwork
+
         const currentNetworkConfig = currentNetwork && config.networks[currentNetwork];
 
         if (currentNetworkConfig) {
+          try {
+            if (
+              currentNetworkConfig.types ||
+              currentNetworkConfig.typesAlias ||
+              currentNetworkConfig.typesBundle ||
+              currentNetworkConfig.typesChain ||
+              currentNetworkConfig.typesSpec
+            ) {
+              api.registry.setKnownTypes({
+                types: currentNetworkConfig.types,
+                typesAlias: currentNetworkConfig.typesAlias,
+                typesBundle: currentNetworkConfig.typesBundle,
+                typesChain: currentNetworkConfig.typesChain,
+                typesSpec: currentNetworkConfig.typesSpec
+              });
+
+              api.registry.register(
+                getSpecTypes(
+                  api.registry,
+                  api.runtimeChain,
+                  api.runtimeVersion.specName,
+                  api.runtimeVersion.specVersion
+                )
+              );
+              api.registry.setHasher(getSpecHasher(api.registry, api.runtimeChain, api.runtimeVersion.specName));
+
+              store.set("types", api.registry.knownTypes.types);
+
+              // for bundled types, pull through the aliases defined
+              if (api.registry.knownTypes.typesBundle) {
+                api.registry.knownTypes.typesAlias = getSpecAlias(
+                  api.registry,
+                  api.runtimeChain,
+                  api.runtimeVersion.specName
+                );
+              }
+            }
+          } catch (error) {
+            console.error(error);
+          }
+
           for (const suri of currentNetworkConfig.accounts) {
             const pair = new Keyring({
               type: "sr25519"

@@ -12,6 +12,7 @@ interface Props {
   defaultValue: RawParam;
   index: number;
   isDisabled?: boolean;
+  isContractParam?: boolean;
   name?: string;
   onChange: (index: number, value: RawParamOnChangeValue) => void;
   onEnter?: () => void;
@@ -22,7 +23,7 @@ interface Props {
   values?: RawParams | null;
 }
 
-function ParamComp ({ defaultValue, index, isDisabled, name, onChange, onEnter, onEscape, overrides, registry, type }: Props): React.ReactElement<Props> {
+function ParamComp ({ defaultValue, index, isDisabled, name, onChange, onEnter, onEscape, overrides, registry, type, isContractParam }: Props): React.ReactElement<Props> {
   const _onChange = useCallback(
     (value: RawParamOnChangeValue): void =>
       onChange(index, value),
@@ -32,6 +33,7 @@ function ParamComp ({ defaultValue, index, isDisabled, name, onChange, onEnter, 
   return (
     <div className='ui--Param-composite'>
       <Param
+        isContractParam={isContractParam}
         defaultValue={defaultValue}
         isDisabled={isDisabled}
         key={`input:${index}`}

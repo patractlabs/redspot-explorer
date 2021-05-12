@@ -25,6 +25,7 @@ function Item ({ className = '', isLink, isToplevel, route: { Modal, href, icon,
   return (
     <li className={`ui--MenuItem ${className}${count ? ' withCounter' : ''} ${isLink ? 'isLink' : ''} ${isToplevel ? 'topLevel  highlight--color-contrast' : ''}`}>
       <a
+        className="ui--MenuLink"
         href={Modal ? undefined : (href || `#/${name}`)}
         onClick={Modal ? toggleModal : undefined}
         rel='noopener noreferrer'

@@ -14,5 +14,5 @@ export default function getAddressName (address: string, type: KeyringItemType |
     ? [false, false, meta.name.toUpperCase()]
     : defaultName
       ? [false, true, defaultName.toUpperCase()]
-      : [true, false, toShortAddress(address)];
+      : [true, false, meta.source ==='redspot' ? `${toShortAddress(address)}(REDSPOT)` : toShortAddress(address)];
 }
