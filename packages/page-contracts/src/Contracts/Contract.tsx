@@ -6,21 +6,23 @@ import type { ActionStatus } from '@polkadot/react-components/Status/types';
 import type { Option } from '@polkadot/types';
 import type { BlockNumber, ContractInfo } from '@polkadot/types/interfaces';
 import type { ContractLink } from './types';
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { ContractPromise } from '@polkadot/api-contract';
 import { AddressInfo, AddressMini, Button, Forget } from '@polkadot/react-components';
+import { getAddressMeta } from '@polkadot/react-components/util';
 import { useApi, useBestNumber, useCall, useToggle } from '@polkadot/react-hooks';
 import { BlockToTime } from '@polkadot/react-query';
 import { keyring } from '@polkadot/ui-keyring';
 import { formatNumber, isFunction, isUndefined } from '@polkadot/util';
-import { getAddressMeta } from '@polkadot/react-components/util';
 
 import Messages from '../shared/Messages';
 import { useTranslation } from '../translate';
+import { Extrinsics } from './Extrinsics';
 
 interface Props {
   className?: string;
@@ -43,6 +45,7 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
   const info = useCall<ContractInfo | null>(api.query.contracts.contractInfoOf, [contract.address], { transform: transformInfo });
   const [evictAt, setEvictAt] = useState<BlockNumber | null>(null);
   const [isForgetOpen, toggleIsForgetOpen] = useToggle();
+  const [ isExtrinsicsOpen, toggleIsExtrinsicsOpen ] = useState(false);
 
   useEffect((): void => {
     if (info && isFunction(api.rpc.contracts?.rentProjection)) {
@@ -90,6 +93,17 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
 
   return (
     <tr className={className}>
+      {
+        isExtrinsicsOpen &&
+          <Extrinsics
+            contract={contract}
+            contractAddress={contract.address.toString()}
+            onClose={() => toggleIsExtrinsicsOpen(false)} />
+      }
+      <td>
+        <a
+          onClick={() => toggleIsExtrinsicsOpen(true)}> {t('Related Extrinsics')} </a>
+      </td>
       <td className='address top'>
         {isForgetOpen && (
           <Forget

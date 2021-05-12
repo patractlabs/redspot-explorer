@@ -26,7 +26,7 @@ function Param ({ className = '', defaultValue, isDisabled, isInOption, isOption
 
   if (!Component) {
     return null;
-  } 
+  }
 
   return isOptional
     ? (

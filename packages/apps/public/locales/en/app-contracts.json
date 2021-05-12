@@ -1,4 +1,7 @@
 {
+  "No Related Extrinsics": "No Related Extrinsics",
+  "Related Extrinsics": "Related Extrinsics",
+  "Close": "Close",
   "0x prefixed hex, e.g. 0x1234 or ascii data": "0x prefixed hex, e.g. 0x1234 or ascii data",
   "<none>": "<none>",
   "A deployed contract that has either been deployed or attached. The address and ABI are used to construct the parameters.": "A deployed contract that has either been deployed or attached. The address and ABI are used to construct the parameters.",

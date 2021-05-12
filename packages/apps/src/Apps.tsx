@@ -7,11 +7,12 @@ import React, { useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import AccountSidebar from '@polkadot/app-accounts/Sidebar';
+import { Updater } from '@polkadot/app-contracts/Updater';
 import { getSystemChainColor } from '@polkadot/apps-config';
+import { ExtrisnicsProvider } from '@polkadot/react-api/ExtrinsicsContext';
 import GlobalStyle from '@polkadot/react-components/styles';
 import { useApi } from '@polkadot/react-hooks';
 import Signer from '@polkadot/react-signer';
-import { Updater } from '@polkadot/app-contracts/Updater';
 
 import ConnectingOverlay from './overlays/Connecting';
 import Content from './Content';
@@ -29,8 +30,6 @@ function Apps ({ className = '' }: Props): React.ReactElement<Props> {
     [systemChain, systemName]
   );
 
-  
-  
   return (
     <>
       <GlobalStyle uiHighlight={uiHighlight} />
@@ -38,7 +37,9 @@ function Apps ({ className = '' }: Props): React.ReactElement<Props> {
         <Menu />
         <AccountSidebar>
           <Signer>
-            <Content />
+            <ExtrisnicsProvider>
+              <Content />
+            </ExtrisnicsProvider>
           </Signer>
           <ConnectingOverlay />
           <div id={PORTAL_ID} />
