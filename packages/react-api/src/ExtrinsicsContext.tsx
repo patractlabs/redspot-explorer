@@ -34,10 +34,12 @@ export interface Block {
 
 const ExtrisnicsContext: Context<{
   blocks: Block[];
+  setBlocks: React.Dispatch<React.SetStateAction<Block[]>>;
 }> = React.createContext({
   blocks: []
-} as {
+} as unknown as {
   blocks: Block[];
+  setBlocks: React.Dispatch<React.SetStateAction<Block[]>>;
 });
 
 interface Props {
@@ -45,11 +47,19 @@ interface Props {
   url?: string;
 }
 
-const CONTRACT_EXTRINSICS_KEY = 'contract-extrinsics';
+export const generateKey = (genesisHash: string): string => {
+  const CONTRACT_EXTRINSICS_KEY = 'contract-extrinsics';
 
-const retriveBlocksFromStorage = (systemName: string): Block[] => {
+  return `${CONTRACT_EXTRINSICS_KEY}-${genesisHash}`;
+};
+
+export const saveBlocksToStorage = (genesisHash: string, blocks: Block[]): void => {
+  localStorage.setItem(generateKey(genesisHash), JSON.stringify(blocks));
+};
+
+export const retriveBlocksFromStorage = (genesisHash: string): Block[] => {
   try {
-    const retrivedString = localStorage.getItem(`${CONTRACT_EXTRINSICS_KEY}-${systemName}`) || '';
+    const retrivedString = localStorage.getItem(generateKey(genesisHash)) || '';
 
     return JSON.parse(retrivedString) as Block[];
   } catch {
@@ -57,50 +67,50 @@ const retriveBlocksFromStorage = (systemName: string): Block[] => {
   }
 };
 
-const retriveBlocksFromEuropaNode = async (api: ApiPromise, startIndex = 1): Promise<{
-  block: SignedBlock;
-  height: number;
-}[]> => {
+const retriveBlock = async (api: ApiPromise, blockHash: string, height: number): Promise<Block> => {
+  const block = await api.rpc.chain.getBlock(blockHash.toString());
+
+  return transformBlock(block, height);
+};
+
+const retriveBlocksFromNode = async (api: ApiPromise, startHeight = 1): Promise<Block[]> => {
   const header = await api.rpc.chain.getHeader();
   const currentHeight = header.number.toNumber();
 
-  type NullableBlock = {
-    block: SignedBlock;
-    height: number;
-  } | null;
+  if (currentHeight <= startHeight) {
+    return [];
+  }
+
+  type NullableBlock = Block | null;
 
   const blocks: NullableBlock[] = await Promise.all(
-    (new Array(currentHeight - startIndex + 1))
+    (new Array(currentHeight - startHeight + 1))
       .fill(1)
       .map(async (_, i) => {
         try {
-          const blockHash = await api.rpc.chain.getBlockHash(startIndex + i);
-          const block = await api.rpc.chain.getBlock(blockHash.toString());
+          const blockHash = await api.rpc.chain.getBlockHash(startHeight + i);
 
-          return {
-            block,
-            height: startIndex + i
-          };
+          return await retriveBlock(api, blockHash.toString(), startHeight + 1);
         } catch (e) {
           return null;
         }
       })
   );
 
-  console.log('retriveBlocksFromEuropaNode', blocks, currentHeight, startIndex);
+  console.log('retriveBlocksFromEuropaNode', blocks, currentHeight, startHeight);
 
-  return blocks.filter((block) => !!block) as { block: SignedBlock; height: number; }[];
+  return blocks.filter((block) => !!block) as Block[];
 };
 
 const transformBlock = (block: SignedBlock, number: number): Block => {
   const extrinsics: Extrinsic[] = block.block.extrinsics
     .map((extrinsic, index) => {
-      const dest: { id: string } = extrinsic.args[0]?.toJSON() as { id: string };
+      const dest: { id?: string } = extrinsic.args[0]?.toJSON() as { id?: string };
 
       return {
         args: extrinsic.args.map((a) => a.toString()),
         callIndex: extrinsic.callIndex.toString(),
-        contract: dest.id,
+        contract: dest.id || '',
         createdAtHash: extrinsic.createdAtHash?.toString(),
         data: u8aToHex(extrinsic.args[3]?.toU8a() || stringToU8a('')),
         hash: extrinsic.hash.toString(),
@@ -133,7 +143,7 @@ const patchBlocks = (oldBlocks: Block[], newBlocks: Block[]) => {
 
   return [
     ...oldBlocks.slice(0, sliceIndex),
-    ...newBlocks.filter((block) => block.extrinsics.length)
+    ...newBlocks
   ];
 };
 
@@ -150,19 +160,15 @@ const ExtrisnicsProvider = React.memo(function Api ({ children }: Props): React.
     let initPromise: Promise<void>;
 
     if (systemName.toLowerCase().includes('europa')) {
-      initPromise = retriveBlocksFromEuropaNode(api, 1).then(
+      initPromise = retriveBlocksFromNode(api).then(
         (_blocks) => {
-          const blocks = _blocks.map((block) => transformBlock(block.block, block.height)).filter((block) => !!block.extrinsics.length);
-
-          blocksRef.current = blocks;
-          setBlocks(blocks);
-          localStorage.setItem(`${CONTRACT_EXTRINSICS_KEY}-${systemName}`, JSON.stringify(blocks));
-          console.log('patch from europa', blocks);
+          blocksRef.current = _blocks;
+          setBlocks(_blocks);
         },
         () => {}
       );
     } else {
-      const savedBlocks = retriveBlocksFromStorage(systemName);
+      const savedBlocks = retriveBlocksFromStorage(api.genesisHash.toString());
 
       blocksRef.current = savedBlocks;
       setBlocks(savedBlocks);
@@ -171,25 +177,28 @@ const ExtrisnicsProvider = React.memo(function Api ({ children }: Props): React.
     }
 
     initPromise.then(() => {
-      api.derive.chain.subscribeNewHeads((header) => {
-        console.log('new header', header);
+      api.derive.chain.subscribeNewHeads(async (header) => {
+        const newBlock = await retriveBlock(api, header.hash.toString(), header.number.toNumber());
 
-        api.rpc.chain.getBlock(header.hash.toString()).then((block) => {
-          const newBlock = transformBlock(block, header.number.toNumber());
-          const newBlocks = patchBlocks(blocksRef.current, newBlock.extrinsics.length ? [newBlock] : []);
+        if (!newBlock.extrinsics.length) {
+          return;
+        }
 
-          blocksRef.current = newBlocks;
-          setBlocks(newBlocks);
-          localStorage.setItem(`${CONTRACT_EXTRINSICS_KEY}-${systemName}`, JSON.stringify(newBlocks));
+        const newBlocks = patchBlocks(blocksRef.current, [newBlock]);
 
-          console.log('new blocks', newBlocks);
-        });
+        blocksRef.current = newBlocks;
+        setBlocks(newBlocks);
+
+        if (!systemName.toLowerCase().includes('europa')) {
+          saveBlocksToStorage(api.genesisHash.toString(), newBlocks);
+        }
       });
     }, () => {});
   }, [api, isApiReady, systemName]);
 
   return <ExtrisnicsContext.Provider value={{
-    blocks
+    blocks,
+    setBlocks
   }}>{children}</ExtrisnicsContext.Provider>;
 });
 

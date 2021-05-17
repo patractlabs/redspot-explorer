@@ -9,10 +9,11 @@ import type { ContractLink } from './types';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { ContractPromise } from '@polkadot/api-contract';
+import { Block, ExtrisnicsContext, retriveBlocksFromStorage, saveBlocksToStorage } from '@polkadot/react-api/ExtrinsicsContext';
 import { AddressInfo, AddressMini, Button, Forget } from '@polkadot/react-components';
 import { getAddressMeta } from '@polkadot/react-components/util';
 import { useApi, useBestNumber, useCall, useToggle } from '@polkadot/react-hooks';
@@ -36,7 +37,20 @@ function transformInfo (optInfo: Option<ContractInfo>): ContractInfo | null {
   return optInfo.unwrapOr(null);
 }
 
-dayjs.extend(relativeTime)
+function removeContractRelatedExtrinsics (genesisHash: string, contract: string): Block[] {
+  let blocks = retriveBlocksFromStorage(genesisHash);
+
+  blocks = blocks.filter((block) => {
+    block.extrinsics = block.extrinsics.filter((extrinsic) => extrinsic.contract !== contract);
+
+    return !!block.extrinsics.length;
+  });
+  saveBlocksToStorage(genesisHash, blocks);
+
+  return blocks;
+}
+
+dayjs.extend(relativeTime);
 
 function Contract ({ className, contract, index, links, onCall }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
@@ -46,6 +60,7 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
   const [evictAt, setEvictAt] = useState<BlockNumber | null>(null);
   const [isForgetOpen, toggleIsForgetOpen] = useToggle();
   const [ isExtrinsicsOpen, toggleIsExtrinsicsOpen ] = useState(false);
+  const { setBlocks } = useContext(ExtrisnicsContext);
 
   useEffect((): void => {
     if (info && isFunction(api.rpc.contracts?.rentProjection)) {
@@ -77,9 +92,12 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
         status.message = (error as Error).message;
       }
 
+      const remainedBlocks = removeContractRelatedExtrinsics(api.genesisHash.toString(), contract.address.toString());
+
+      setBlocks(remainedBlocks);
       toggleIsForgetOpen();
     },
-    [contract.address, t, toggleIsForgetOpen]
+    [contract.address, t, toggleIsForgetOpen, api, setBlocks]
   );
 
   const createdTime = useMemo(() => {

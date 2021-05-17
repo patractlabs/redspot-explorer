@@ -78,15 +78,11 @@ export const Extrinsics: FC<{
               return extrinsic;
             }
           )
-        ),
+        ).reverse(),
       [])
         .filter((extrisnic) => extrisnic.contract === contractAddress),
     [blocks, contractAddress, contract]
   );
-
-  useMemo(() => {
-    console.log('extrisnics', contract.address.toString(), extrisnics);
-  }, [contract, extrisnics]);
 
   return (
     <Modal header={t('Related Extrinsics')}>
@@ -101,15 +97,7 @@ export const Extrinsics: FC<{
                   {extrisnic.height} - {extrisnic.index === undefined ? '0' : extrisnic.index}
                 </Link></td>
                 <td style={{ color: '#2f8ddb' }}>{ extrisnic.identifier }</td>
-                {/* <td>
-                  {
-                    extrisnic.messageArgs.map((arg) =>
-                      <span style={{ color: '' }} key={arg.name}>{arg.value}<br/> </span>
-                    )
-                  }
-                </td> */}
                 <td>{extrisnic.hash}</td>
-                {/* <td>{extrisnic.}</td> */}
               </tr>
             )
           }
