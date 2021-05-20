@@ -111,7 +111,7 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
 
   return (
     <tr className={className}>
-      <td className='address top'>
+      <td className='address'>
         {isForgetOpen && (
           <Forget
             address={contract.address.toString()}
@@ -133,7 +133,7 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
         }
         <a onClick={() => toggleIsExtrinsicsOpen(true)}> {t('extrinsics')} </a>
       </td>
-      <td className='all top'>
+      <td className='all' >
         <Messages
           contract={contract}
           contractAbi={contract.abi}
@@ -191,6 +191,11 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
 }
 
 export default React.memo(styled(Contract)`
+  > .all {
+    > .ui--Messages {
+      padding-bottom: 0px !important;
+    }
+  }
   td.top a+a {
     margin-left: 0.75rem;
   }

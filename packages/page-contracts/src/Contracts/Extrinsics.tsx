@@ -10,6 +10,7 @@ import { Modal, Table } from '@polkadot/react-components';
 import { hexToU8a } from '@polkadot/util';
 
 import { useTranslation } from '../translate';
+import { useApi } from '@polkadot/react-hooks';
 
 interface ArgPair {
   name: string;
@@ -27,6 +28,11 @@ type ExtendedExtrinsic = Extrinsic & {
 const TableNoMargin = styled(Table)`
   margin-bottom: 0rem;
 `;
+const Tip = styled.div`
+  margin-bottom: 10px;
+  color: rgba(254, 240, 240, 0.66);
+`;
+
 
 const transformMessage = (contract: ContractPromise, extrinsic: Extrinsic): {
   identifier: string;
@@ -53,6 +59,7 @@ export const Extrinsics: FC<{
   onClose: () => void;
 }> = ({ contract, contractAddress, onClose }): ReactElement => {
   const { t } = useTranslation();
+  const { systemName } = useApi();
   const { blocks } = useContext(ExtrisnicsContext);
   const headerRef = useRef([
     [t('block')],
@@ -87,6 +94,10 @@ export const Extrinsics: FC<{
   return (
     <Modal header={t('Related Extrinsics')}>
       <Modal.Content>
+        {
+          !systemName.toLowerCase().includes('europa') &&
+            <Tip>{t('Not all related extrinsics included')}</Tip>
+        }
         <TableNoMargin
           empty={t<string>('No Related Extrinsics')}
           header={headerRef.current}>
