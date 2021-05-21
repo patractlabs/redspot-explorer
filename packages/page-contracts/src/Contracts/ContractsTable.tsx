@@ -19,7 +19,9 @@ import Contract from './Contract';
 import { getContractForAddress } from './util';
 
 export interface Props {
-  contracts: string[];
+  contracts: ContractPromise[];
+  updated: any
+  type: 'local' | 'store'
 }
 
 interface Indexes {
@@ -28,23 +30,18 @@ interface Indexes {
   onCallResult?: (messageIndex: number, result?: ContractCallOutcome) => void;
 }
 
-function filterContracts (api: ApiPromise, keyringContracts: string[] = []): ContractPromise[] {
-  return keyringContracts
-    .map((address) => getContractForAddress(api, address.toString()))
-    .filter((contract): contract is ContractPromise => !!contract);
-}
 
-function ContractsTable ({ contracts: keyringContracts }: Props): React.ReactElement<Props> {
+
+function ContractsTable ({ updated, contracts, type }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { api } = useApi();
   const newBlock = useCall<SignedBlockExtended>(api.derive.chain.subscribeNewBlocks);
   const [{ contractIndex, messageIndex, onCallResult }, setIndexes] = useState<Indexes>({ contractIndex: 0, messageIndex: 0 });
   const [isCallOpen, setIsCallOpen] = useState(false);
-  const [trigger, setTrigger] = useState(0);
   const [contractLinks, setContractLinks] = useState<Record<string, ContractLink[]>>({});
 
   const headerRef = useRef<[string?, string?, number?][]>([
-    [t('contracts'), 'start'],
+    [t(type === 'local' ? 'recent contracts' : 'saved contracts'), 'start'],
     [t('extrinsics'), 'start'],
     [undefined, undefined, 3],
     [t('status'), 'start'],
@@ -58,7 +55,7 @@ function ContractsTable ({ contracts: keyringContracts }: Props): React.ReactEle
       const exts = newBlock.block.extrinsics
         .filter(({ method }) => api.tx.contracts.call.is(method))
         .map(({ args }): ContractLink | null => {
-          const contractId = keyringContracts.find((a) => args[0].eq(a));
+          const contractId = contracts.find((contract) => args[0].eq(contract.address));
 
           if (!contractId) {
             return null;
@@ -67,7 +64,7 @@ function ContractsTable ({ contracts: keyringContracts }: Props): React.ReactEle
           return {
             blockHash: newBlock.block.header.hash.toHex(),
             blockNumber: formatNumber(newBlock.block.header.number),
-            contractId
+            contractId: contract.address.toString()
           };
         })
         .filter((value): value is ContractLink => !!value);
@@ -80,34 +77,7 @@ function ContractsTable ({ contracts: keyringContracts }: Props): React.ReactEle
         return { ...links };
       });
     }
-  }, [api, keyringContracts, newBlock]);
-
-  useEffect((): void => {
-    // const triggerUpdate = (): void => {
-    //   setUpdated(Date.now());
-    //   setAllCodes(store.getAllCode());
-    // };
-
-    store.on("new-code", () => {
-      setTrigger(t => t+1)
-    });
-    store.on("removed-code", () => {
-      setTrigger(t => t+1)
-    });
-    store
-      .loadAll()
-      .then(() => {
-        setTrigger(t => t+1)
-      })
-      .catch((): void => {
-         setTrigger(t => t+1)
-      });
-  }, []);
-
-  const contracts = useMemo(
-    () => filterContracts(api, keyringContracts),
-    [api, trigger ,keyringContracts]
-  );
+  }, [api, contracts, newBlock]);
 
   const _toggleCall = useCallback(
     () => setIsCallOpen((isCallOpen) => !isCallOpen),
@@ -142,6 +112,7 @@ function ContractsTable ({ contracts: keyringContracts }: Props): React.ReactEle
             key={contract.address.toString()}
             links={contractLinks[contract.address.toString()]}
             onCall={_onCall}
+            type={type}
           />
         ))}
       </Table>

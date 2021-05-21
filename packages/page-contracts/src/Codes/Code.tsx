@@ -5,19 +5,19 @@ import type { Option } from '@polkadot/types';
 import type { Codec } from '@polkadot/types/types';
 import type { CodeStored } from '../types';
 
-import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import { Button, Card, CopyButton, Forget } from '@polkadot/react-components';
-import { useApi, useCall, useToggle } from '@polkadot/react-hooks';
+import React, { useCallback, useContext, useMemo } from "react";
+import styled from "styled-components";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { Button, Card, CopyButton, Forget, StatusContext } from "@polkadot/react-components";
+import { useApi, useCall, useToggle } from "@polkadot/react-hooks";
 
-import { CodeRow, Messages } from '../shared';
-import store from '../store';
-import { useTranslation } from '../translate';
-import useAbi from '../useAbi';
+import { CodeRow, Messages } from "../shared";
+import store from "../store";
+import { useTranslation } from "../translate";
+import useAbi from "../useAbi";
 
-dayjs.extend(relativeTime)
+dayjs.extend(relativeTime);
 
 interface Props {
   className?: string;
@@ -25,25 +25,22 @@ interface Props {
   onShowDeploy: (codeHash: string, constructorIndex: number) => void;
 }
 
-function Code ({ className, code, onShowDeploy }: Props): React.ReactElement<Props> {
+function Code({ className, code, onShowDeploy }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { api } = useApi();
   const optCode = useCall<Option<Codec>>(api.query.contracts.codeStorage, [code.json.codeHash]);
   const [isForgetOpen, toggleIsForgetOpen] = useToggle();
   const { contractAbi } = useAbi([code.json.abi, code.contractAbi], code.json.codeHash, true);
 
-  const _onShowDeploy = useCallback(
-    () => onShowDeploy(code.json.codeHash, 0),
-    [code, onShowDeploy]
-  );
-  
+  const _onShowDeploy = useCallback(() => onShowDeploy(code.json.codeHash, 0), [code, onShowDeploy]);
+
   const isMemory = useMemo(() => {
-    return (code.json as any).isMemory
-  }, [code])
+    return (code.json as any).isMemory;
+  }, [code]);
 
   const createdTime = useMemo(() => {
-    return dayjs((code.json as any).whenCreated).fromNow()
-  }, [code])
+    return dayjs((code.json as any).whenCreated).fromNow();
+  }, [code]);
 
   const _onDeployConstructor = useCallback(
     (constructorIndex = 0): void => {
@@ -52,81 +49,81 @@ function Code ({ className, code, onShowDeploy }: Props): React.ReactElement<Pro
     [code, onShowDeploy]
   );
 
-  const _onForget = useCallback(
+  const _onForget = useCallback((): void => {
+    try {
+      store.forgetCode(code.json.codeHash);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      toggleIsForgetOpen();
+    }
+  }, [code, toggleIsForgetOpen]);
+
+  const { queueAction } = useContext(StatusContext);
+
+  const onSave = useCallback(
     (): void => {
-      try {
-        store.forgetCode(code.json.codeHash);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        toggleIsForgetOpen();
-      }
+      store
+      .saveCode(code.json.codeHash, { abi: code.json.abi, name: code.json.name, tags: code.json.tags })
+
+      queueAction && queueAction({
+        action: 'save contract bundle',
+        message: `saved ${code.json?.name}`,
+        status: 'queued'
+      });
     },
-    [code, toggleIsForgetOpen]
+    [queueAction, t, code]
   );
 
   return (
     <tr className={className}>
-      <td className='address top'>
+      <td className="address">
         <Card>
-          <CodeRow
-            code={code}
-            withTags={false}
-          />
+          <CodeRow code={code} withTags={false} />
           {isForgetOpen && (
-            <Forget
-              key='modal-forget-account'
-              mode='code'
-              onClose={toggleIsForgetOpen}
-              onForget={_onForget}
-            >
-              <CodeRow
-                code={code || ''}
-                isInline
-              >
-                <p>{t<string>('You are about to remove this code from your list of available code hashes. Once completed, should you need to access it again, you will have to manually add the code hash again.')}</p>
-                <p>{t<string>('This operation does not remove the uploaded code WASM and ABI from the chain, nor any deployed contracts. The forget operation only limits your access to the code on this browser.')}</p>
+            <Forget key="modal-forget-account" mode="code" onClose={toggleIsForgetOpen} onForget={_onForget}>
+              <CodeRow code={code || ""} isInline>
+                <p>
+                  {t<string>(
+                    "You are about to remove this code from your list of available code hashes. Once completed, should you need to access it again, you will have to manually add the code hash again."
+                  )}
+                </p>
+                <p>
+                  {t<string>(
+                    "This operation does not remove the uploaded code WASM and ABI from the chain, nor any deployed contracts. The forget operation only limits your access to the code on this browser."
+                  )}
+                </p>
               </CodeRow>
             </Forget>
           )}
         </Card>
       </td>
-      <td className='all top'>
+      <td className="all">
         <Messages
           contractAbi={contractAbi}
           onSelectConstructor={_onDeployConstructor}
           withConstructors
-          constructorsDefault={true}
+          constructorsDefault={false}
           disableExecute={true}
           withMessages
           withWasm
         />
       </td>
-      <td className='together codeHash'>
+      <td className="together codeHash">
         <div>{`${code.json.codeHash.substr(0, 8)}…${code.json.codeHash.slice(-6)}`}</div>
         <CopyButton value={code.json.codeHash} />
       </td>
-      <td className='start together'>
-        {optCode && (
-          optCode.isSome ? t<string>('Available') : t<string>('Not on-chain')
-        )}
+      <td className="start together">
+        {optCode && (optCode.isSome ? t<string>("Available") : t<string>("Not on-chain"))}
       </td>
-      <td>
-        {createdTime}
-      </td>
-      <td className='button'>
-        {
-          !isMemory && <Button
-          icon='trash'
-          onClick={toggleIsForgetOpen}
-        />}
-        {!contractAbi && (
-          <Button
-            icon='upload'
-            label={t('deploy')}
-            onClick={_onShowDeploy}
-          />
+      <td className="createTime">{createdTime}</td>
+      <td className="button">
+        {!isMemory ? (
+          <Button icon="trash" onClick={toggleIsForgetOpen} />
+        ) : (
+          <Button icon="save" onClick={onSave} />
         )}
+        {!contractAbi && <Button icon="upload" label={t("deploy")} onClick={_onShowDeploy} />}
       </td>
     </tr>
   );
@@ -142,5 +139,9 @@ export default React.memo(styled(Code)`
         margin-right: 0.5rem;
       }
     }
+  }
+
+  .createTime {
+    white-space: nowrap;
   }
 `);

@@ -1,34 +1,33 @@
 // Copyright 2017-2021 @polkadot/app-staking authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ContractPromise } from '@polkadot/api-contract';
 import type { ContractCallOutcome } from '@polkadot/api-contract/types';
+import { Block, ExtrisnicsContext, retriveBlocksFromStorage, saveBlocksToStorage } from '@polkadot/react-api/ExtrinsicsContext';
+import { AddressInfo, AddressMini, Button, Forget, StatusContext } from '@polkadot/react-components';
 import type { ActionStatus } from '@polkadot/react-components/Status/types';
+import { getAddressMeta } from '@polkadot/react-components/util';
+import { useApi, useBestNumber, useCall, useToggle } from '@polkadot/react-hooks';
+import { BlockToTime } from '@polkadot/react-query';
 import type { Option } from '@polkadot/types';
 import type { BlockNumber, ContractInfo } from '@polkadot/types/interfaces';
-import type { ContractLink } from './types';
-
+import { keyring } from '@polkadot/ui-keyring';
+import { formatNumber, isFunction, isUndefined } from '@polkadot/util';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
-import { ContractPromise } from '@polkadot/api-contract';
-import { Block, ExtrisnicsContext, retriveBlocksFromStorage, saveBlocksToStorage } from '@polkadot/react-api/ExtrinsicsContext';
-import { AddressInfo, AddressMini, Button, Forget } from '@polkadot/react-components';
-import { getAddressMeta } from '@polkadot/react-components/util';
-import { useApi, useBestNumber, useCall, useToggle } from '@polkadot/react-hooks';
-import { BlockToTime } from '@polkadot/react-query';
-import { keyring } from '@polkadot/ui-keyring';
-import { formatNumber, isFunction, isUndefined } from '@polkadot/util';
-
-import Messages from '../shared/Messages';
-import { useTranslation } from '../translate';
+import { Messages } from "../shared";
+import store from "../store";
+import { useTranslation } from "../translate";
 import { Extrinsics } from './Extrinsics';
+import type { ContractLink } from './types';
 
 interface Props {
   className?: string;
   contract: ContractPromise;
   index: number;
+  type: 'local' | 'store',
   links?: ContractLink[];
   onCall: (contractIndex: number, messaeIndex: number, resultCb: (messageIndex: number, result?: ContractCallOutcome) => void) => void;
 }
@@ -52,7 +51,7 @@ function removeContractRelatedExtrinsics (genesisHash: string, contract: string)
 
 dayjs.extend(relativeTime);
 
-function Contract ({ className, contract, index, links, onCall }: Props): React.ReactElement<Props> | null {
+function Contract ({ className, contract, index, links, onCall, type }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const { api } = useApi();
   const bestNumber = useBestNumber();
@@ -99,6 +98,30 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
     },
     [contract.address, t, toggleIsForgetOpen, api, setBlocks]
   );
+  const { queueAction } = useContext(StatusContext);
+
+  const onSave = useCallback(
+    (): void => {
+      const name = `${(contract.abi.json as any).contract.name}-${(contract.abi.json as any).source.hash.slice(2,8)}(${contract.address.toString().slice(0, 6)})`
+
+      keyring.saveContract(contract.address.toString(), {
+          contract: {
+            abi: JSON.stringify(contract.abi.json),
+            codeHash: (contract.abi.json as any).source.hash,
+            genesisHash: api.genesisHash.toHex()
+          },
+          name,
+          tags: []
+        });
+
+      queueAction && queueAction({
+        action: 'save contract',
+        message: `saved ${name}`,
+        status: 'queued'
+      });
+    },
+    [queueAction, t, contract]
+  );
 
   const createdTime = useMemo(() => {
     const meta = getAddressMeta(contract.address.toString(), 'contract')
@@ -121,7 +144,7 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
             onForget={_onForget}
           />
         )}
-        <AddressMini value={contract.address} />
+        <AddressMini override={`${contract.abi.project.contract.name.toString()}-${(contract.abi.json as any).source.hash.slice(2, 8)}(${contract.address.toString().slice(0, 6)})`.toUpperCase()} value={contract.address} />
       </td>
       <td>
         {
@@ -177,14 +200,21 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
             : t<string>('None')
         )}
       </td>
-      <td>
+      <td className="creatTime">
         {createdTime}
       </td>
       <td className='button'>
+        {
+          type === 'local' ?
+        <Button
+          icon='save'
+          onClick={onSave}
+        /> : 
         <Button
           icon='trash'
           onClick={toggleIsForgetOpen}
         />
+        }
       </td>
     </tr>
   );
@@ -198,5 +228,9 @@ export default React.memo(styled(Contract)`
   }
   td.top a+a {
     margin-left: 0.75rem;
+  }
+
+  .creatTime {
+    white-space: nowrap;
   }
 `);

@@ -93,15 +93,15 @@ function Deploy ({ codeHash, constructorIndex = 0, onClose, setConstructorIndex 
   const _onSuccess = useCallback(
     (result: BlueprintSubmittableResult): void => {
       if (result.contract) {
-        keyring.saveContract(result.contract.address.toString(), {
-          contract: {
-            abi: JSON.stringify(result.contract.abi.json),
-            codeHash,
-            genesisHash: api.genesisHash.toHex()
-          },
-          name: `${name}(${result.contract.address.toString().slice(0, 6)})`,
-          tags: []
-        });
+        // keyring.saveContract(result.contract.address.toString(), {
+        //   contract: {
+        //     abi: JSON.stringify(result.contract.abi.json),
+        //     codeHash,
+        //     genesisHash: api.genesisHash.toHex()
+        //   },
+        //   name: `${name}(${result.contract.address.toString().slice(0, 6)})`,
+        //   tags: []
+        // });
 
         onClose && onClose();
       }

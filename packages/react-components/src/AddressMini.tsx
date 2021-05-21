@@ -37,9 +37,10 @@ interface Props {
   withSidebar?: boolean;
   withName?: boolean;
   withShrink?: boolean;
+  override?: React.ReactNode;
 }
 
-function AddressMini ({ balance, bonded, children, className = '', iconInfo, isHighlight, isPadded = true, label, labelBalance, nameExtra, summary, value, withAddress = true, withBalance = false, withBonded = false, withLockedVote = false, withName = true, withShrink = false, withSidebar = true }: Props): React.ReactElement<Props> | null {
+function AddressMini ({override, balance, bonded, children, className = '', iconInfo, isHighlight, isPadded = true, label, labelBalance, nameExtra, summary, value, withAddress = true, withBalance = false, withBonded = false, withLockedVote = false, withName = true, withShrink = false, withSidebar = true }: Props): React.ReactElement<Props> | null {
   if (!value) {
     return null;
   }
@@ -65,6 +66,7 @@ function AddressMini ({ balance, bonded, children, className = '', iconInfo, isH
                 <AccountName
                   value={value}
                   withSidebar={withSidebar}
+                  override={override}
                 >
                   {nameExtra}
                 </AccountName>
