@@ -7,10 +7,10 @@ import styled from 'styled-components';
 import { ContractPromise } from '@polkadot/api-contract';
 import { Extrinsic, ExtrisnicsContext } from '@polkadot/react-api/ExtrinsicsContext';
 import { Modal, Table } from '@polkadot/react-components';
+import { useApi } from '@polkadot/react-hooks';
 import { hexToU8a } from '@polkadot/util';
 
 import { useTranslation } from '../translate';
-import { useApi } from '@polkadot/react-hooks';
 
 interface ArgPair {
   name: string;
@@ -33,7 +33,6 @@ const Tip = styled.div`
   color: rgba(254, 240, 240, 0.66);
 `;
 
-
 const transformMessage = (contract: ContractPromise, extrinsic: Extrinsic): {
   identifier: string;
   args: ArgPair[];
@@ -49,7 +48,7 @@ const transformMessage = (contract: ContractPromise, extrinsic: Extrinsic): {
 
     return { identifier: message.message.identifier, args };
   } catch (e) {
-    return { identifier: '', args: [] };
+    return { identifier: extrinsic.method.method, args: [] };
   }
 };
 
@@ -85,8 +84,10 @@ export const Extrinsics: FC<{
               return extrinsic;
             }
           )
-        ).reverse(),
-      [])
+        ),
+        []
+      )
+        .reverse()
         .filter((extrisnic) => extrisnic.contract === contractAddress),
     [blocks, contractAddress, contract]
   );

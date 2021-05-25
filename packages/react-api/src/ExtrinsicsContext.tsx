@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable header/header */
+import type { Vec } from '@polkadot/types';
 import type { SignedBlock } from '@polkadot/types/interfaces';
+import type { EventRecord } from '@polkadot/types/interfaces/system';
 
 import React, { Context, useEffect, useRef, useState } from 'react';
 
@@ -11,18 +13,10 @@ import { stringToU8a, u8aToHex } from '@polkadot/util';
 
 export interface Extrinsic {
   contract: string;
-  args: string[];
-  callIndex: string;
-  createdAtHash?: string;
   data: string;
   hash: string;
   index: number;
-  isSigned: boolean;
-  method: { method: string, section: string };
-  nonce: number;
-  signature: string;
-  signer: string;
-  type: number;
+  method: { method: string; section: string; };
 }
 
 export interface Block {
@@ -68,9 +62,12 @@ export const retriveBlocksFromStorage = (genesisHash: string): Block[] => {
 };
 
 const retriveBlock = async (api: ApiPromise, blockHash: string, height: number): Promise<Block> => {
-  const block = await api.rpc.chain.getBlock(blockHash.toString());
+  const [block, events] = await Promise.all([
+    api.rpc.chain.getBlock(blockHash),
+    api.query.system.events.at(blockHash)
+  ]);
 
-  return transformBlock(block, height);
+  return transformBlock(block, height, events);
 };
 
 const retriveBlocksFromNode = async (api: ApiPromise, startHeight = 1): Promise<Block[]> => {
@@ -90,40 +87,53 @@ const retriveBlocksFromNode = async (api: ApiPromise, startHeight = 1): Promise<
         try {
           const blockHash = await api.rpc.chain.getBlockHash(startHeight + i);
 
-          return await retriveBlock(api, blockHash.toString(), startHeight + 1);
+          return await retriveBlock(api, blockHash.toString(), startHeight + i);
         } catch (e) {
           return null;
         }
       })
   );
 
-  console.log('retriveBlocksFromEuropaNode', blocks, currentHeight, startHeight);
+  // console.log('retriveBlocksFromEuropaNode', blocks, currentHeight, startHeight);
 
   return blocks.filter((block) => !!block) as Block[];
 };
 
-const transformBlock = (block: SignedBlock, number: number): Block => {
+const isCall = (extrinsic: { method: { section: string; method: string; } }) => {
+  return extrinsic.method.section === 'contracts' && extrinsic.method.method === 'call';
+};
+
+const isInstantiation = (extrinsic: { method: { section: string; method: string; } }) => {
+  return extrinsic.method.section === 'contracts' && (extrinsic.method.method === 'instantiateWithCode' || extrinsic.method.method === 'instantiate');
+};
+
+const transformBlock = (block: SignedBlock, number: number, events: Vec<EventRecord>): Block => {
   const extrinsics: Extrinsic[] = block.block.extrinsics
     .map((extrinsic, index) => {
-      const dest: { id?: string } = extrinsic.args[0]?.toJSON() as { id?: string };
+      let contract = '';
+
+      if (isCall(extrinsic)) {
+        contract = (extrinsic.args[0].toJSON() as { id: string }).id;
+      } else if (isInstantiation(extrinsic)) {
+        const event = events.find(({ event: { method, section }, phase }) =>
+          phase.isApplyExtrinsic &&
+            phase.asApplyExtrinsic.eq(index) &&
+            section === 'contracts' &&
+            method === 'Instantiated'
+        );
+
+        contract = event?.event.data[1].toString() || '';
+      }
 
       return {
-        args: extrinsic.args.map((a) => a.toString()),
-        callIndex: extrinsic.callIndex.toString(),
-        contract: dest.id || '',
-        createdAtHash: extrinsic.createdAtHash?.toString(),
+        contract,
         data: u8aToHex(extrinsic.args[3]?.toU8a() || stringToU8a('')),
         hash: extrinsic.hash.toString(),
         index,
-        isSigned: extrinsic.isSigned,
-        method: extrinsic.method.toHuman() as { method: string, section: string },
-        nonce: extrinsic.nonce.toNumber(),
-        signature: extrinsic.signature.toString(),
-        signer: extrinsic.signer.toString(),
-        type: extrinsic.type
+        method: extrinsic.method.toHuman() as { method: string; section: string; }
       };
     })
-    .filter((extrinsic) => extrinsic.method.section === 'contracts' && extrinsic.method.method === 'call');
+    .filter((extrinsic) => isCall(extrinsic) || isInstantiation(extrinsic));
 
   return {
     extrinsics,
@@ -172,7 +182,7 @@ const ExtrisnicsProvider = React.memo(function Api ({ children }: Props): React.
 
       blocksRef.current = savedBlocks;
       setBlocks(savedBlocks);
-      console.log('savedBlocks', savedBlocks, systemName);
+      // console.log('savedBlocks', savedBlocks, systemName);
       initPromise = Promise.resolve();
     }
 

@@ -54,7 +54,7 @@ dayjs.extend(relativeTime);
 
 function Contract ({ className, contract, index, links, onCall }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
-  const { api } = useApi();
+  const { api, systemName } = useApi();
   const bestNumber = useBestNumber();
   const info = useCall<ContractInfo | null>(api.query.contracts.contractInfoOf, [contract.address], { transform: transformInfo });
   const [evictAt, setEvictAt] = useState<BlockNumber | null>(null);
@@ -92,12 +92,16 @@ function Contract ({ className, contract, index, links, onCall }: Props): React.
         status.message = (error as Error).message;
       }
 
-      const remainedBlocks = removeContractRelatedExtrinsics(api.genesisHash.toString(), contract.address.toString());
+      // 清除非Europa节点数据
+      if (!systemName.toLowerCase().includes('europa')) {
+        const remainedBlocks = removeContractRelatedExtrinsics(api.genesisHash.toString(), contract.address.toString());
 
-      setBlocks(remainedBlocks);
+        setBlocks(remainedBlocks);
+      }
+
       toggleIsForgetOpen();
     },
-    [contract.address, t, toggleIsForgetOpen, api, setBlocks]
+    [contract.address, t, toggleIsForgetOpen, api, setBlocks, systemName]
   );
 
   const createdTime = useMemo(() => {
