@@ -11,22 +11,23 @@ import { Abi } from '@polkadot/api-contract';
 import { api } from '@polkadot/react-api';
 
 const KEY_CODE = 'code:';
+const REDSPOT_KEY_CODE = 'redspotCode:';
 
 let MEMORY = new Map()
 
 class Store extends EventEmitter {
-  private allCode: Record<string, CodeStored> = {};
+  private allCode: CodeStored[] = [];
 
   public get hasCode (): boolean {
-    return Object.keys(this.allCode).length !== 0;
+    return this.allCode.length !== 0;
   }
 
   public getAllCode (): CodeStored[] {
-    return Object.values(this.allCode).sort((a, b) => b.json.whenCreated - a.json.whenCreated);
+    return [...this.allCode].sort((a, b) => b.json.whenCreated - a.json.whenCreated);
   }
 
   public getCode (codeHash: string): CodeStored | undefined {
-    return this.allCode[codeHash];
+    return this.allCode.find((item) => item.json.codeHash === codeHash);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -42,14 +43,16 @@ class Store extends EventEmitter {
       genesisHash: api.genesisHash.toHex(),
       whenCreated: existing?.json.whenCreated || Date.now()
     };
-    const key = `${KEY_CODE}${json.codeHash}`;
-
+    
     if(isMemory) {
+      const key = `${REDSPOT_KEY_CODE}${json.codeHash}`
       MEMORY.set(key, json)
+      this.addCode(key, json as CodeJson);
     } else {
+      const key = `${KEY_CODE}${json.codeHash}`
       store.set(key, json);
+      this.addCode(key, json as CodeJson);
     }
-    this.addCode(key, json as CodeJson);
   }
 
   public forgetCode (codeHash: string): void {
@@ -77,7 +80,7 @@ class Store extends EventEmitter {
           return;
         }
 
-        if (key.startsWith(KEY_CODE)) {
+        if (key.startsWith(REDSPOT_KEY_CODE)) {
           this.addCode(key, json);
         }
       });
@@ -88,14 +91,19 @@ class Store extends EventEmitter {
 
   private addCode (key: string, json: CodeJson): void {
     try {
-      const isNew = !this.allCode[json.codeHash]
+      const isMemory = !key.startsWith(KEY_CODE) 
+      const finded = this.allCode.find(item => item.json.codeHash === json.codeHash && !!(item as any).json?.isMemory === isMemory)
+      const isNew = !finded
 
-      this.allCode[json.codeHash] = {
-        contractAbi: json.abi
-          ? new Abi(json.abi, api.registry.getChainProperties())
-          : undefined,
-        json
-      };
+      if(isNew) {
+        this.allCode.push({
+          contractAbi: json.abi
+            ? new Abi(json.abi, api.registry.getChainProperties())
+            : undefined,
+
+          json
+        });
+      }
 
       isNew && this.emit('new-code');
     } catch (error) {
@@ -105,7 +113,13 @@ class Store extends EventEmitter {
 
   private removeCode (key: string, codeHash: string): void {
     try {
-      delete this.allCode[codeHash];
+      this.allCode = this.allCode.filter((item) => {
+        if((item.json as any).isMemory) {
+          return true
+        } else {
+          return item.json.codeHash !== codeHash
+        }
+      })
       store.remove(key);
       MEMORY.delete(key)
       this.emit('removed-code');

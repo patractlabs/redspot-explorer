@@ -115,9 +115,9 @@ function Messages ({ className = '', disableExecute, constructorsDefault, contra
           ))}
         </Expander>
       )}
-      {withWasm && source.wasm.length !== 0 && (
+      {/* {withWasm && source.wasm.length !== 0 && (
         <div>{t<string>('{{size}} WASM bytes', { replace: { size: formatNumber(source.wasm.length) } })}</div>
-      )}
+      )} */}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // Copyright 2017-2021 @polkadot/app-staking authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useRef, useEffect, useCallback, useState } from "react";
+import React, { useRef, useMemo, useEffect, useCallback, useState } from "react";
 
 import { Table, Button } from "@polkadot/react-components";
 import { useToggle } from "@polkadot/react-hooks";
@@ -53,22 +53,52 @@ function Codes({}: Props): React.ReactElement<Props> {
       });
   }, []);
 
-  const headerRef = useRef<[string?, string?, number?][]>([
-    [t("contract bundles"), "start"],
+  const inMemoryHeaderRef = useRef<[string?, string?, number?][]>([
+    [t("local contract bundles"), "start"],
     [],
     [],
     [t("status"), "start"],
     [t("upload time"), "start"],
-    [],
+    []
   ]);
+
+  const inStoreHeaderRef = useRef<[string?, string?, number?][]>([
+    [t("saved contract bundles"), "start"],
+    [],
+    [],
+    [t("status"), "start"],
+    [t("upload time"), "start"],
+    []
+  ]);
+
+  const allCode = contracts.getAllCode();
+
+  const inMemoryCode = useMemo(() => {
+    return allCode.filter(code => {
+      return (code.json as any).isMemory;
+    });
+  }, [allCode]);
+
+  const inStoreCode = useMemo(() => {
+    return allCode.filter(code => {
+      return !(code.json as any).isMemory;
+    });
+  }, [allCode]);
 
   return (
     <>
       <Button.Group>
         <Button icon="plus" label={t("Add contract bundle")} onClick={toggleHash} />
       </Button.Group>
-      <Table empty={t<string>("No contract bundle available")} header={headerRef.current}>
-        {contracts.getAllCode().map(
+      <Table empty={t<string>("No contract bundle available")} header={inMemoryHeaderRef.current}>
+        {inMemoryCode.map(
+          (code): React.ReactNode => (
+            <Code code={code} key={code.json.codeHash} onShowDeploy={onShowDeploy} />
+          )
+        )}
+      </Table>
+      <Table empty={t<string>("No contract bundle available")} header={inStoreHeaderRef.current}>
+        {inStoreCode.map(
           (code): React.ReactNode => (
             <Code code={code} key={code.json.codeHash} onShowDeploy={onShowDeploy} />
           )

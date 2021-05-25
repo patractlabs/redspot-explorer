@@ -40,10 +40,10 @@ function ContractsApp ({ basePath, className = '' }: Props): React.ReactElement<
         basePath={basePath}
         items={itemsRef.current}
       />
-      <Display path="/contracts/contract">
+      <Display isHide={true} path="/contracts/contract">
         <Contracts />
       </Display>
-      <Display path="/contracts">
+      <Display isHide={true} path="/contracts">
         <Codes />
       </Display>
       <Display isHide={true} path="/contracts/console">
