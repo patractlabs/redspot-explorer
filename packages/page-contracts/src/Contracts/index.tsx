@@ -55,7 +55,7 @@ function Contracts({ className = "" }: Props): React.ReactElement<Props> {
     setOnRefresh(true)
     api.query.contracts.contractInfoOf.entries()
     .then(arr => {
-      const result = arr.map(([address, info]) => {
+      const result = arr.reverse().map(([address, info]) => {
         if(!info.isEmpty) {
           if(info.unwrap().isAlive) {
             const code = store.getCode(info.unwrap().asAlive.codeHash.toHex())

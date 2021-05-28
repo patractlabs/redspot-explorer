@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { ContractPromise } from '@polkadot/api-contract';
-import { Button, Dropdown, Expander, InputAddress, InputBalance, Modal, Toggle, TxButton } from '@polkadot/react-components';
+import { Button, Dropdown, Expander, InputAddress, Input, InputBalance, Modal, Toggle, TxButton } from '@polkadot/react-components';
 import { useAccountId, useDebounce, useFormField, useToggle } from '@polkadot/react-hooks';
 import { Available } from '@polkadot/react-query';
 import { BN_ONE, BN_ZERO } from '@polkadot/util';
@@ -116,12 +116,11 @@ function Call ({ className = '', contract, messageIndex, onCallResult, onChangeM
       onClose={onClose}
     >
       <Modal.Content>
-        <InputAddress
+        <Input
           help={t<string>('A deployed contract that has either been deployed or attached. The address and ABI are used to construct the parameters.')}
           isDisabled
           label={t<string>('contract to use')}
-          type='contract'
-          value={contract.address}
+          value={contract.address.toString()}
         />
         <InputAddress
           defaultValue={accountId}
