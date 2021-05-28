@@ -27,8 +27,6 @@ export interface Props {
   withConstructors?: boolean;
   withMessages?: boolean;
   withWasm?: boolean;
-  constructorsDefault?: boolean;
-  disableExecute?: boolean;
 }
 
 const READ_ADDR = '0x'.padEnd(66, '0');
@@ -45,7 +43,7 @@ function sortMessages (messages: AbiMessage[]): [AbiMessage, number][] {
     );
 }
 
-function Messages ({ className = '', disableExecute, constructorsDefault, contract, contractAbi: { constructors, messages, project: { source } }, isLabelled, isWatching, onSelect, onSelectConstructor, withConstructors, withMessages, withWasm }: Props): React.ReactElement<Props> {
+function Messages ({ className = '', contract, contractAbi: { constructors, messages, project: { source } }, isLabelled, isWatching, onSelect, onSelectConstructor, withConstructors, withMessages, withWasm }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { api } = useApi();
   const optInfo = useCall<Option<ContractInfo>>(contract && api.query.contracts.contractInfoOf, [contract?.address]);
@@ -64,7 +62,7 @@ function Messages ({ className = '', disableExecute, constructorsDefault, contra
       .all(messages.map((m) =>
         m.isMutating || m.args.length !== 0
           ? Promise.resolve(undefined)
-          : contract.read(m, 0, -1).send(READ_ADDR).catch(() => undefined)
+          : contract.query[m.method](READ_ADDR, 0, -1).catch(() => undefined)
       ))
       .then(setLastResults)
       .catch(console.error);
@@ -87,7 +85,7 @@ function Messages ({ className = '', disableExecute, constructorsDefault, contra
   return (
     <div className={`ui--Messages ${className}${isLabelled ? ' isLabelled' : ''}`}>
       {withConstructors && (
-        <Expander isOpen={!!constructorsDefault} summary={t<string>('Constructors ({{count}})', { replace: { count: constructors.length } })}>
+        <Expander summary={t<string>('Constructors ({{count}})', { replace: { count: constructors.length } })}>
           {sortMessages(constructors).map(([message, index]) => (
             <Message
               index={index}
@@ -109,23 +107,21 @@ function Messages ({ className = '', disableExecute, constructorsDefault, contra
               key={index}
               lastResult={lastResults[index]}
               message={message}
-              disableExecute={disableExecute}
               onSelect={_onSelect}
             />
           ))}
         </Expander>
       )}
-      {/* {withWasm && source.wasm.length !== 0 && (
+      {withWasm && source.wasm.length !== 0 && (
         <div>{t<string>('{{size}} WASM bytes', { replace: { size: formatNumber(source.wasm.length) } })}</div>
-      )} */}
+      )}
     </div>
   );
 }
 
 export default React.memo(styled(Messages)`
   padding-bottom: 0.75rem !important;
-  display: grid;
-  grid-gap: 1rem;
+
   &.isLabelled {
     background: var(--bg-input);
     box-sizing: border-box;

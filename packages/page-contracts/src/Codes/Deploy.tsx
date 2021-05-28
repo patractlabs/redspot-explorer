@@ -77,11 +77,16 @@ function Deploy ({ codeHash, constructorIndex = 0, onClose, setConstructorIndex 
 
   useEffect((): void => {
     endowment && setInitTx((): SubmittableExtrinsic<'promise'> | null => {
-      if (blueprint) {
+      if (blueprint && contractAbi?.constructors[constructorIndex]?.method) {
         try {
-          return blueprint.createContract(constructorIndex, { gasLimit: weight.weight, salt: withSalt ? salt : null, value: endowment }, params);
+          return blueprint.tx[contractAbi.constructors[constructorIndex].method]({
+            gasLimit: weight.weight,
+            salt: withSalt
+              ? salt
+              : null,
+            value: endowment
+          }, ...params);
         } catch (error) {
-          console.log(error)
           return null;
         }
       }

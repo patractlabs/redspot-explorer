@@ -30,7 +30,7 @@ const initCode = `
 
     const contract = await contractFactory.deploy("new", "1000000", {
       gasLimit: "200000000000",
-      value: "100000000000",
+      value: "1000 UNIT",
     });
 
     await contract.tx.transfer(signer, 7);
